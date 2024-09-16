@@ -869,8 +869,15 @@ For simplicity you can choose one of the "channels" (colours) in the image to ap
 
 # ╔═╡ 9eeb876c-ee15-11ea-1794-d3ea79f47b75
 function with_sobel_edge_detect(image)
+	Sx = [1 0 -1; 2 0 -2; 1 0 -1]
+	Sy = [1 2 1; 0 0 0; -1 -2 -2]
+
+	Gx = convolve_image(image, Sx)
+	Gy = convolve_image(image, Sy)
+
+	Gtotal = [√Gx[i, j]^2 + Gy[i, j]^2 for i=1:size(Gx)[1], j=1:size(Gx)[2]]
 	
-	return missing
+	return Gtotal
 end
 
 # ╔═╡ 1b85ee76-ee10-11ea-36d7-978340ef61e6
