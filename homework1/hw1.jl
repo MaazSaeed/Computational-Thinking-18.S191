@@ -869,6 +869,7 @@ For simplicity you can choose one of the "channels" (colours) in the image to ap
 
 # ╔═╡ 9eeb876c-ee15-11ea-1794-d3ea79f47b75
 function with_sobel_edge_detect(image)
+	image = image[:, :, 1] # Gray Scale images only have one channel
 	Sx = [1 0 -1; 2 0 -2; 1 0 -1]
 	Sy = [1 2 1; 0 0 0; -1 -2 -2]
 
