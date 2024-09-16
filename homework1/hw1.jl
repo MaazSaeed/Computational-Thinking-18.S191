@@ -876,9 +876,12 @@ function with_sobel_edge_detect(image)
 	Gx = convolve_image(image, Sx)
 	Gy = convolve_image(image, Sy)
 
-	Gtotal = [√Gx[i, j]^2 + Gy[i, j]^2 for i=1:size(Gx)[1], j=1:size(Gx)[2]]
+	# Naive
+	#Gtotal = [√Gx[i, j]^2 + Gy[i, j]^2 for i=1:size(Gx)[1], j=1:size(Gx)[2]]
+
+	Gt = sqrt.(Gx.^2 + Gy.^2)
 	
-	return Gtotal
+	return Gt
 end
 
 # ╔═╡ 1b85ee76-ee10-11ea-36d7-978340ef61e6
