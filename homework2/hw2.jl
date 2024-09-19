@@ -280,7 +280,7 @@ md"""
 
 # ╔═╡ e49235a4-f367-11ea-3913-f54a4a6b2d6b
 no_vcat_observation = md"""
-With the use of broadcasting assignment operator the only memory allocation happens on call to the similar function to create the same type and size of data structure as that of the img, there by reducing the allocated size to approximately half of that when using vcat which almost doubles the memory allocation i.e. twice the size of the img.
+With the use of broadcasting assignment operator the only memory allocation happens on call to the similar function to create the same type and size of data structure as that of the img, there by reducing the allocated size to approximately half of that when using vcat which almost doubles the memory allocation i.e. twice the size of the img which is evident by the allocs estimates; with vcat the estimate is 1029 while with broadcasting the estimate is 687.
 """
 
 # ╔═╡ 837c43a4-f368-11ea-00a3-990a45cb0cbd
@@ -302,7 +302,12 @@ function remove_in_each_row_views(img, column_numbers)
 	for (i, j) in enumerate(column_numbers)
 		# EDIT THE FOLLOWING LINE and split it into two lines
 		# to avoid using `vcat`.
-		img′[i, :] .= vcat(img[i, 1:j-1], img[i, j+1:end])
+		view_left = @view img[i, 1:j-1]
+		view_right = @view img[i, j+1:end]
+
+		img′[i, 1:j-1] .= view_left
+		img′[i, j:end] .= view_right
+		#img′[i, :] .= vcat(img[i, 1:j-1], img[i, j+1:end])
 	end
 	img′
 end
@@ -337,7 +342,7 @@ Nice! If you did your optimizations right, you should be able to get down the es
 
 # ╔═╡ fd819dac-f368-11ea-33bb-17148387546a
 views_observation = md"""
-<your answer here>
+Almost a thousand allocations i.e. three order of magnitude allocations, compared to vcat, this is because views creates a window into the portion of an array, without any copying, as compared to broadcasting which is faster than vcat but temporarily still gets a slice.
 """
 
 # ╔═╡ 318a2256-f369-11ea-23a9-2f74c566549b
