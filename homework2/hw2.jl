@@ -280,7 +280,7 @@ md"""
 
 # ╔═╡ e49235a4-f367-11ea-3913-f54a4a6b2d6b
 no_vcat_observation = md"""
-<Your answer here>
+With the use of broadcasting assignment operator the only memory allocation happens on call to the similar function to create the same type and size of data structure as that of the img, there by reducing the allocated size to approximately half of that when using vcat which almost doubles the memory allocation i.e. twice the size of the img.
 """
 
 # ╔═╡ 837c43a4-f368-11ea-00a3-990a45cb0cbd
