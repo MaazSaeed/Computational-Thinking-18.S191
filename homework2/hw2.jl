@@ -1,8 +1,6 @@
 ### A Pluto.jl notebook ###
 # v0.19.45
 
-#> risky_file_source = "https://github.com/mitmath/computational-thinking/blob/Fall20/homework/homework2/hw2.jl?raw=true"
-
 using Markdown
 using InteractiveUtils
 
@@ -342,7 +340,7 @@ Nice! If you did your optimizations right, you should be able to get down the es
 
 # ╔═╡ fd819dac-f368-11ea-33bb-17148387546a
 views_observation = md"""
-Almost a thousand allocations i.e. three order of magnitude allocations, compared to vcat, this is because views creates a window into the portion of an array, without any copying, as compared to broadcasting which is faster than vcat but temporarily still gets a slice.
+Almost a thousand allocations i.e. three orders of magnitude allocations were avoided, compared to vcat, this is because views creates a window into the portion of an array, without any copying, as compared to broadcasting which is faster than vcat but temporarily still gets a slice.
 """
 
 # ╔═╡ 318a2256-f369-11ea-23a9-2f74c566549b
@@ -396,8 +394,19 @@ md"""
 
 # ╔═╡ abf20aa0-f31b-11ea-2548-9bea4fab4c37
 function greedy_seam(energies, starting_pixel::Int)
-	# you can delete the body of this function - it's just a placeholder.
-	random_seam(size(energies)..., starting_pixel)
+	rows, cols = size(energies)
+	seam = zeros(Int64, rows)
+	seam[1] = starting_pixel
+	pos = starting_pixel
+	for i=2:rows # starting at the 2nd row till the last row
+		# down-left, down, down-right
+		j1, j2 = max(1, pos-1), min(pos+1, cols)
+		e, dir =  findmin(energies[i, j1:j2])
+		pos = pos + (-1, 0, 1)[dir + (pos == 1)]
+		seam[i] = pos
+	end
+			
+	return seam
 end
 
 # ╔═╡ 5430d772-f397-11ea-2ed8-03ee06d02a22
@@ -908,7 +917,7 @@ bigbreak
 # ╠═abf20aa0-f31b-11ea-2548-9bea4fab4c37
 # ╟─5430d772-f397-11ea-2ed8-03ee06d02a22
 # ╟─f580527e-f397-11ea-055f-bb9ea8f12015
-# ╟─6f52c1a2-f395-11ea-0c8a-138a77f03803
+# ╠═6f52c1a2-f395-11ea-0c8a-138a77f03803
 # ╟─2a7e49b8-f395-11ea-0058-013e51baa554
 # ╟─7ddee6fc-f394-11ea-31fc-5bd665a65bef
 # ╟─980b1104-f394-11ea-0948-21002f26ee25
