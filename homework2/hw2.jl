@@ -132,18 +132,6 @@ function fib(n)
 	return fib(n-1) + fib(n-2)
 end
 
-# ╔═╡ 8ec27ef8-f320-11ea-2573-c97b7b908cb7
-## returns lowest possible sum energy at pixel (i, j), and the column to jump to in row i+1.
-function least_energy(energies, i, j)
-	# base case
-	# if i == something
-	#    return energies[...] # no need for recursive computation in the base case!
-	# end
-	#
-	# induction
-	# combine results from recursive calls to `least_energy`.
-end
-
 # ╔═╡ cbf29020-f3ba-11ea-2cb0-b92836f3d04b
 begin
 	struct AccessTrackerArray{T,N} <: AbstractArray{T, N}
@@ -455,6 +443,26 @@ which is one of $j-1$, $j$ or $j+1$, up to boundary conditions.
 Return these two values in a tuple.
 """
 
+# ╔═╡ 8ec27ef8-f320-11ea-2573-c97b7b908cb7
+## returns lowest possible sum energy at pixel (i, j), and the column to jump to in row i+1.
+function least_energy(energies, i, j)
+	rows, cols = size(energies)
+	if i == rows
+		return energies[i, j], j
+	end
+
+	# pixels to check under current pixel
+	# down-left, down, down-right
+	j1, j2 = max(1, j-1), min(j+1, cols)
+	E, nj = Inf, missing
+    for k=j1:j2
+        e, p = least_energy(energies, i+1, k)
+        if e < E E, nj = e, k end
+    end
+	
+	return energies[i, j] + E, nj
+end
+
 # ╔═╡ a7f3d9f8-f3bb-11ea-0c1a-55bbb8408f09
 md"""
 This is so elegant, correct, but inefficient! If you **check this checkbox** $(@bind compute_access CheckBox()), you will see the number of accesses made to the energies array it took to compute the least energy from the pixel (1,7):
@@ -475,8 +483,15 @@ This will give you the method used in the lecture to perform [exhaustive search 
 # ╔═╡ 85033040-f372-11ea-2c31-bb3147de3c0d
 function recursive_seam(energies, starting_pixel)
 	m, n = size(energies)
-	# Replace the following line with your code.
-	[rand(1:starting_pixel) for i=1:m]
+	
+	if m == 1 
+		return starting_pixel
+	end
+	
+	next_px = least_energy(energies, 1, starting_pixel)[2] 
+	next_seam = recursive_seam(energies[2:end,:], next_px)
+	
+	return vcat(starting_pixel, next_seam...)
 end
 
 # ╔═╡ 1d55333c-f393-11ea-229a-5b1e9cabea6a
@@ -492,7 +507,8 @@ md"""
 
 # ╔═╡ 6d993a5c-f373-11ea-0dde-c94e3bbd1552
 exhaustive_observation = md"""
-<your answer here>
+For each pixel, there are 3 possible to go to, therebt exhaustively searching the entire space requires 3^N searches.
+O(N) = 3**n
 """
 
 # ╔═╡ ea417c2a-f373-11ea-3bb0-b1b5754f2fac
@@ -858,6 +874,27 @@ bigbreak
 # ╔═╡ 48089a00-f321-11ea-1479-e74ba71df067
 bigbreak
 
+# ╔═╡ 304e6123-340d-4c38-9816-350b7eefc316
+# ╠═╡ disabled = true
+#=╠═╡
+begin
+	E = [0.1 0.2 0.1
+		 0.1 0.5 0.6
+	     0.1 0.3 0.4]
+
+	print(least_energy(E, 1, 1))
+end
+  ╠═╡ =#
+
+# ╔═╡ daec2f55-3f5c-4ecf-b58c-b912cdc8f769
+begin
+	E = [0.1 0.2 0.1
+		 0.9 0.5 0.6
+	     0.1 0.3 0.4]
+
+	print(recursive_seam(E, 1))
+end
+
 # ╔═╡ Cell order:
 # ╟─e6b6760a-f37f-11ea-3ae1-65443ef5a81a
 # ╟─ec66314e-f37f-11ea-0af4-31da0584e881
@@ -932,13 +969,15 @@ bigbreak
 # ╠═ddba07dc-f3b7-11ea-353e-0f67713727fc
 # ╠═73b52fd6-f3b9-11ea-14ed-ebfcab1ce6aa
 # ╠═8ec27ef8-f320-11ea-2573-c97b7b908cb7
+# ╠═304e6123-340d-4c38-9816-350b7eefc316
 # ╟─9f18efe2-f38e-11ea-0871-6d7760d0b2f6
 # ╟─a7f3d9f8-f3bb-11ea-0c1a-55bbb8408f09
-# ╟─fa8e2772-f3b6-11ea-30f7-699717693164
+# ╠═fa8e2772-f3b6-11ea-30f7-699717693164
 # ╟─18e0fd8a-f3bc-11ea-0713-fbf74d5fa41a
 # ╟─cbf29020-f3ba-11ea-2cb0-b92836f3d04b
 # ╟─8bc930f0-f372-11ea-06cb-79ced2834720
 # ╠═85033040-f372-11ea-2c31-bb3147de3c0d
+# ╠═daec2f55-3f5c-4ecf-b58c-b912cdc8f769
 # ╠═1d55333c-f393-11ea-229a-5b1e9cabea6a
 # ╠═d88bc272-f392-11ea-0efd-15e0e2b2cd4e
 # ╠═e66ef06a-f392-11ea-30ab-7160e7723a17
