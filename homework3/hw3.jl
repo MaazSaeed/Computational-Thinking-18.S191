@@ -375,6 +375,8 @@ md"""
 
 # ╔═╡ cc62929e-f9af-11ea-06b9-439ac08dcb52
 row_col_answer = md"""
+The sum of a specific row results in the cumulative frequency of a given word starting with that particular character
+The sum of a specific column results in the cumulative frequency of a given word with the char as the second character
 """
 
 # ╔═╡ 2f8dedfc-fb98-11ea-23d7-2159bdb6a299
