@@ -647,9 +647,8 @@ Dict(
 # ╔═╡ 8ce3b312-fb82-11ea-200c-8d5b12f03eea
 function word_counts(words::Vector)
 	counts = Dict()
-	
-	# your code here
-	
+	addWord(word) = counts[word] = get(counts, word, 0) + 1
+	foreach(addWord, words)
 	return counts
 end
 
