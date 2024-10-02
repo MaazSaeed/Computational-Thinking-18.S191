@@ -689,7 +689,6 @@ md"""
 # ╔═╡ 795eb2c4-f37b-11ea-01e1-1dbac3c80c13
 function seam_from_precomputed_least_energy(energies, starting_pixel::Int)
 	least_energies = least_energy_matrix(energies)
-	m, n = size(least_energies)
 
 	return greedy_seam(least_energies, startin_pixel)
 end

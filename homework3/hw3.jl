@@ -150,7 +150,7 @@ md"👉 Use `filter` to extract just the characters from our alphabet out of `me
 messy_sentence_1 = "#wow 2020 ¥500 (blingbling!)"
 
 # ╔═╡ 75694166-f998-11ea-0428-c96e1113e2a0
-cleaned_sentence_1 = missing
+cleaned_sentence_1 = filter(isinalphabet, messy_sentence_1)
 
 # ╔═╡ 05f0182c-f999-11ea-0a52-3d46c65a049e
 md"""
@@ -166,7 +166,7 @@ md"👉 Use the function `lowercase` to convert `messy_sentence_2` into a lower 
 messy_sentence_2 = "Awesome! 😍"
 
 # ╔═╡ d3a4820e-f998-11ea-2a5c-1f37e2a6dd0a
-cleaned_sentence_2 = missing
+cleaned_sentence_2 = filter(isinalphabet, lowercase(messy_sentence_2))
 
 # ╔═╡ aad659b8-f998-11ea-153e-3dae9514bfeb
 md"""
@@ -216,8 +216,7 @@ $(html"<br>")
 
 # ╔═╡ 4affa858-f92e-11ea-3ece-258897c37e51
 function clean(text)
-	# we turn everything to lowercase to keep the number of letters small
-	missing
+	filter(isinalphabet, lowercase(unaccent(text)))
 end
 
 # ╔═╡ e00d521a-f992-11ea-11e0-e9da8255b23b
@@ -1148,7 +1147,7 @@ bigbreak
 # ╟─38d1ace8-f991-11ea-0b5f-ed7bd08edde5
 # ╠═ddf272c8-f990-11ea-2135-7bf1a6dca0b7
 # ╟─3cc688d2-f996-11ea-2a6f-0b4c7a5b74c2
-# ╟─d67034d0-f92d-11ea-31c2-f7a38ebb412f
+# ╠═d67034d0-f92d-11ea-31c2-f7a38ebb412f
 # ╟─a094e2ac-f92d-11ea-141a-3566552dd839
 # ╠═27c9a7f4-f996-11ea-1e46-19e3fc840ad9
 # ╟─f2a4edfa-f996-11ea-1a24-1ba78fd92233
@@ -1167,7 +1166,7 @@ bigbreak
 # ╠═d236b51e-f997-11ea-0c55-abb11eb35f4d
 # ╠═a56724b6-f9a0-11ea-18f2-991e0382eccf
 # ╟─24860970-fc48-11ea-0009-cddee695772c
-# ╟─734851c6-f92d-11ea-130d-bf2a69e89255
+# ╠═734851c6-f92d-11ea-130d-bf2a69e89255
 # ╟─8d3bc9ea-f9a1-11ea-1508-8da4b7674629
 # ╠═4affa858-f92e-11ea-3ece-258897c37e51
 # ╠═e00d521a-f992-11ea-11e0-e9da8255b23b
