@@ -327,17 +327,20 @@ if first_sample === missing
 	"""
 end
 
+# ╔═╡ 84ee16b2-0bd0-4d82-9533-bd245101f163
+[['t' 'h']...]
+
 # ╔═╡ e91c6fd8-f930-11ea-01ac-476bbde79079
 md"""👉 What is the frequency of the combination `"th"`?"""
 
 # ╔═╡ 1b4c0c28-f9ab-11ea-03a6-69f69f7f90ed
-th_frequency = sample_freq_matrix[Int('t') - Int('a') + 1, Int('h') - Int('a') + 1]
+th_frequency = sample_freq_matrix[index_of_letter.(['t','h'])...]
 
 # ╔═╡ 1f94e0a2-f9ab-11ea-1347-7dd906ebb09d
 md"""👉 What about `"ht"`?"""
 
 # ╔═╡ 41b2df7c-f931-11ea-112e-ede3b16f357a
-ht_frequency = sample_freq_matrix[Int('h') - Int('a') + 1, Int('h') - Int('a') + 1]
+ht_frequency = sample_freq_matrix[index_of_letter.(['h','t'])...]
 
 # ╔═╡ 1dd1e2f4-f930-11ea-312c-5ff9e109c7f6
 md"""
@@ -345,7 +348,7 @@ md"""
 """
 
 # ╔═╡ 65c92cac-f930-11ea-20b1-6b8f45b3f262
-double_letters = alphabet
+double_letters = filter(ch -> count(string(ch, ch), first_sample) > 0, alphabet)
 
 # ╔═╡ 4582ebf4-f930-11ea-03b2-bf4da1a8f8df
 md"""
@@ -353,7 +356,7 @@ md"""
 """
 
 # ╔═╡ 7898b76a-f930-11ea-2b7e-8126ec2b8ffd
-most_likely_to_follow_w = 'h'
+most_likely_to_follow_w = 'x'
 
 # ╔═╡ 458cd100-f930-11ea-24b8-41a49f6596a0
 md"""
@@ -361,7 +364,7 @@ md"""
 """
 
 # ╔═╡ bc401bee-f931-11ea-09cc-c5efe2f11194
-most_likely_to_precede_w = 'a'
+most_likely_to_precede_w = 'x'
 
 # ╔═╡ 45c20988-f930-11ea-1d12-b782d2c01c11
 md"""
@@ -1204,6 +1207,7 @@ bigbreak
 # ╟─0b67789c-f931-11ea-113c-35e5edafcbbf
 # ╠═6896fef8-f9af-11ea-0065-816a70ba9670
 # ╟─39152104-fc49-11ea-04dd-bb34e3600f2f
+# ╠═84ee16b2-0bd0-4d82-9533-bd245101f163
 # ╟─e91c6fd8-f930-11ea-01ac-476bbde79079
 # ╠═1b4c0c28-f9ab-11ea-03a6-69f69f7f90ed
 # ╟─1f94e0a2-f9ab-11ea-1347-7dd906ebb09d
@@ -1224,11 +1228,11 @@ bigbreak
 # ╟─2f8dedfc-fb98-11ea-23d7-2159bdb6a299
 # ╟─b7446f34-f9b1-11ea-0f39-a3c17ba740e5
 # ╟─4f97b572-f9b0-11ea-0a99-87af0797bf28
-# ╟─46c905d8-f9b0-11ea-36ed-0515e8ed2621
+# ╠═46c905d8-f9b0-11ea-36ed-0515e8ed2621
 # ╟─4e8d327e-f9b0-11ea-3f16-c178d96d07d9
 # ╟─489b03d4-f9b0-11ea-1de0-11d4fe4e7c69
 # ╟─d83f8bbc-f9af-11ea-2392-c90e28e96c65
-# ╟─fd202410-f936-11ea-1ad6-b3629556b3e0
+# ╠═fd202410-f936-11ea-1ad6-b3629556b3e0
 # ╟─0e465160-f937-11ea-0ebb-b7e02d71e8a8
 # ╟─6718d26c-f9b0-11ea-1f5a-0f22f7ddffe9
 # ╟─141af892-f933-11ea-1e5f-154167642809
