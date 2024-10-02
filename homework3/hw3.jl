@@ -587,6 +587,9 @@ ngrams([1, 2, 3, 42], 3)
 # ╔═╡ 067f33fc-fb7b-11ea-352e-956c8727c79f
 ngrams(forest_words, 4)
 
+# ╔═╡ 935fcb41-c465-431c-ac0f-941a1e78f2d1
+ngrams(split("to be or not to be that is the question"), 3)
+
 # ╔═╡ 7b10f074-fb7c-11ea-20f0-034ddff41bc3
 md"""
 If you are stuck, you can write `ngrams(words, n) = bigrams(words)` (ignoring the true value of $n$), and continue with the other exercises.
@@ -692,10 +695,12 @@ If the same ngram occurs multiple times (e.g. "said Emma laughing"), then the la
 # ╔═╡ b726f824-fb5e-11ea-328e-03a30544037f
 function completions_cache(grams)
 	cache = Dict()
-	
-	# your code here
-	
-	cache
+	for gram in grams
+		init, last = gram[1:end-1], gram[end]
+		cache[init] = get(cache, init, []) # get the list of grams, if none then return []
+		push!(cache[init], last) # concatenate the n word of the n-gram
+	end
+	return cache
 end
 
 # ╔═╡ 18355314-fb86-11ea-0738-3544e2e3e816
@@ -786,7 +791,7 @@ Enter your own text in the box below, and use that as training data to generate 
 @bind generate_demo_sample TextField((50,5), default=samples.English)
 
 # ╔═╡ 70169682-fb8c-11ea-27c0-2dad2ff3080f
-md"""Using $(@bind generate_sample_n_letters NumberField(1:5))grams for characters"""
+md"""Using $(@bind generate_sample_n_letters NumberField(1:10))grams for characters"""
 
 # ╔═╡ 402562b0-fb63-11ea-0769-375572cc47a8
 md"""Using $(@bind generate_sample_n_words NumberField(1:5))grams for words"""
@@ -797,9 +802,6 @@ md"""
 
 Uncomment the cell below to generate some Jane Austen text:
 """
-
-# ╔═╡ 49b69dc2-fb8f-11ea-39af-030b5c5053c3
-# generate(emma, 100; n=4) |> Quote
 
 # ╔═╡ cc07f576-fbf3-11ea-2c6f-0be63b9356fc
 if student.name == "Jazzy Doe"
@@ -849,6 +851,9 @@ generate(
 	n=generate_sample_n_words, 
 	use_words=true
 ) |> Quote
+
+# ╔═╡ 49b69dc2-fb8f-11ea-39af-030b5c5053c3
+ generate(emma, 100; n=4) |> Quote
 
 # ╔═╡ ddef9c94-fb96-11ea-1f17-f173a4ff4d89
 function compimg(img, labels=[c*d for c in replace(alphabet, ' ' => "_"), d in replace(alphabet, ' ' => "_")])
@@ -1143,7 +1148,7 @@ bigbreak
 
 # ╔═╡ Cell order:
 # ╟─e6b6760a-f37f-11ea-3ae1-65443ef5a81a
-# ╟─ec66314e-f37f-11ea-0af4-31da0584e881
+# ╠═ec66314e-f37f-11ea-0af4-31da0584e881
 # ╟─85cfbd10-f384-11ea-31dc-b5693630a4c5
 # ╠═33e43c7c-f381-11ea-3abc-c942327456b1
 # ╟─938185ec-f384-11ea-21dc-b56b7469f798
@@ -1265,6 +1270,7 @@ bigbreak
 # ╠═7be98e04-fb6b-11ea-111d-51c48f39a4e9
 # ╠═052f822c-fb7b-11ea-382f-af4d6c2b4fdb
 # ╠═067f33fc-fb7b-11ea-352e-956c8727c79f
+# ╠═935fcb41-c465-431c-ac0f-941a1e78f2d1
 # ╟─954fc466-fb7b-11ea-2724-1f938c6b93c6
 # ╟─e467c1c6-fbf2-11ea-0d20-f5798237c0a6
 # ╟─7b10f074-fb7c-11ea-20f0-034ddff41bc3
@@ -1288,7 +1294,7 @@ bigbreak
 # ╟─4b27a89a-fb8d-11ea-010b-671eba69364e
 # ╟─d7b7a14a-fb90-11ea-3e2b-2fd8f379b4d8
 # ╟─1939dbea-fb63-11ea-0bc2-2d06b2d4b26c
-# ╟─70169682-fb8c-11ea-27c0-2dad2ff3080f
+# ╠═70169682-fb8c-11ea-27c0-2dad2ff3080f
 # ╟─b5dff8b8-fb6c-11ea-10fc-37d2a9adae8c
 # ╟─402562b0-fb63-11ea-0769-375572cc47a8
 # ╟─ee8c5808-fb5f-11ea-19a1-3d58217f34dc
