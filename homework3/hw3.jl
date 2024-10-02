@@ -461,7 +461,7 @@ The only question left is: How do we compare two matrices? When two matrices are
 
 # ╔═╡ 13c89272-f934-11ea-07fe-91b5d56dedf8
 function matrix_distance(A, B)
-	missing # do something with A .- B
+	return sum(abs.(A .- B))
 end
 
 # ╔═╡ 7d60f056-f931-11ea-39ae-5fa18a955a77
@@ -1247,7 +1247,7 @@ bigbreak
 # ╠═7dabee08-f931-11ea-0cb2-c7d5afd21551
 # ╟─3736a094-fb57-11ea-1d39-e551aae62b1d
 # ╠═13c89272-f934-11ea-07fe-91b5d56dedf8
-# ╟─7d60f056-f931-11ea-39ae-5fa18a955a77
+# ╠═7d60f056-f931-11ea-39ae-5fa18a955a77
 # ╟─b09f5512-fb58-11ea-2527-31bea4cee823
 # ╟─8c7606f0-fb93-11ea-0c9c-45364892cbb8
 # ╟─568f0d3a-fb54-11ea-0f77-171718ef12a5
