@@ -661,7 +661,9 @@ How many times does `"Emma"` occur in the book?
 """
 
 # ╔═╡ 953363dc-fb84-11ea-1128-ebdfaf5160ee
-emma_count = missing
+#emma_count = count(string("Emma"), emma)
+# OR
+ emma_count = get(word_counts(emma_words), "Emma", -1)
 
 # ╔═╡ 294b6f50-fb84-11ea-1382-03e9ab029a2d
 md"""
