@@ -356,7 +356,8 @@ md"""
 """
 
 # ╔═╡ 7898b76a-f930-11ea-2b7e-8126ec2b8ffd
-most_likely_to_follow_w = 'x'
+# Get the entire row starting with 'w'
+most_likely_to_follow_w = alphabet[argmax(sample_freq_matrix[index_of_letter('w'),:])]
 
 # ╔═╡ 458cd100-f930-11ea-24b8-41a49f6596a0
 md"""
@@ -364,7 +365,8 @@ md"""
 """
 
 # ╔═╡ bc401bee-f931-11ea-09cc-c5efe2f11194
-most_likely_to_precede_w = 'x'
+# Get the entire 'w' column
+most_likely_to_precede_w = alphabet[argmax(sample_freq_matrix[:,index_of_letter('w')])]
 
 # ╔═╡ 45c20988-f930-11ea-1d12-b782d2c01c11
 md"""
@@ -373,7 +375,6 @@ md"""
 
 # ╔═╡ cc62929e-f9af-11ea-06b9-439ac08dcb52
 row_col_answer = md"""
-
 """
 
 # ╔═╡ 2f8dedfc-fb98-11ea-23d7-2159bdb6a299
