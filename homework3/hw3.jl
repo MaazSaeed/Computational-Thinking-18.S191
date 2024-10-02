@@ -53,7 +53,7 @@ Feel free to ask questions!
 # ╔═╡ 33e43c7c-f381-11ea-3abc-c942327456b1
 # edit the code below to set your name and kerberos ID (i.e. email without @mit.edu)
 
-student = (name = "Jazzy Doe", kerberos_id = "jazz")
+student = (name = "Maaz Saeed", kerberos_id = "jazz")
 
 # you might need to wait until all other cells in this notebook have completed running. 
 # scroll around the page to see what's up
@@ -804,7 +804,7 @@ Uncomment the cell below to generate some Jane Austen text:
 """
 
 # ╔═╡ cc07f576-fbf3-11ea-2c6f-0be63b9356fc
-if student.name == "Jazzy Doe"
+if student.name == "Maaz Saed"
 	md"""
 	!!! danger "Before you submit"
 	    Remember to fill in your **name** and **Kerberos ID** at the top of this notebook.
@@ -1147,9 +1147,9 @@ bigbreak
 bigbreak
 
 # ╔═╡ Cell order:
-# ╟─e6b6760a-f37f-11ea-3ae1-65443ef5a81a
+# ╠═e6b6760a-f37f-11ea-3ae1-65443ef5a81a
 # ╠═ec66314e-f37f-11ea-0af4-31da0584e881
-# ╟─85cfbd10-f384-11ea-31dc-b5693630a4c5
+# ╠═85cfbd10-f384-11ea-31dc-b5693630a4c5
 # ╠═33e43c7c-f381-11ea-3abc-c942327456b1
 # ╟─938185ec-f384-11ea-21dc-b56b7469f798
 # ╠═86e1ee96-f314-11ea-03f6-0f549b79e7c9
@@ -1301,7 +1301,7 @@ bigbreak
 # ╟─2521bac8-fb8f-11ea-04a4-0b077d77529e
 # ╠═49b69dc2-fb8f-11ea-39af-030b5c5053c3
 # ╟─7f341c4e-fb54-11ea-1919-d5421d7a2c75
-# ╟─cc07f576-fbf3-11ea-2c6f-0be63b9356fc
+# ╠═cc07f576-fbf3-11ea-2c6f-0be63b9356fc
 # ╟─6b4d6584-f3be-11ea-131d-e5bdefcc791b
 # ╟─54b1e236-fb53-11ea-3769-b382ef8b25d6
 # ╟─b7803a28-fb96-11ea-3e30-d98eb322d19a
