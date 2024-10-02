@@ -577,7 +577,7 @@ ngrams([1, 2, 3, 42], 2) == bigrams([1, 2, 3, 42])
 
 # ╔═╡ 7be98e04-fb6b-11ea-111d-51c48f39a4e9
 function ngrams(words, n)
-	missing
+	filter(x -> length(x) == n, [words[idx:(idx+n-1 <= length(words) ? idx+n-1 : end)] for (idx, _) in enumerate(words)])
 end
 
 # ╔═╡ 052f822c-fb7b-11ea-382f-af4d6c2b4fdb
