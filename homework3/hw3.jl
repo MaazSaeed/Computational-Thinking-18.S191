@@ -260,7 +260,7 @@ $(html"<br>")
 
 # ╔═╡ 92bf9fd2-f9a5-11ea-25c7-5966e44db6c6
 unused_letters = let
-	['a', 'b']
+	['j', 'q', 'z']
 end
 
 # ╔═╡ 01215e9a-f9a9-11ea-363b-67392741c8d4
@@ -1183,9 +1183,9 @@ bigbreak
 # ╟─95b81778-f9a5-11ea-3f51-019430bc8fa8
 # ╟─7df7ab82-f9ad-11ea-2243-21685d660d71
 # ╟─dcffd7d2-f9a6-11ea-2230-b1afaecfdd54
-# ╟─b3dad856-f9a7-11ea-1552-f7435f1cb605
+# ╠═b3dad856-f9a7-11ea-1552-f7435f1cb605
 # ╟─01215e9a-f9a9-11ea-363b-67392741c8d4
-# ╟─be55507c-f9a7-11ea-189c-4ffe8377212e
+# ╠═be55507c-f9a7-11ea-189c-4ffe8377212e
 # ╟─8ae13cf0-f9a8-11ea-3919-a735c4ed9e7f
 # ╟─343d63c2-fb58-11ea-0cce-efe1afe070c2
 # ╟─b5b8dd18-f938-11ea-157b-53b145357fd1
