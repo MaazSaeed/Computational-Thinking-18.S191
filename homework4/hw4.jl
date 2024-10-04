@@ -139,7 +139,7 @@ md"""
 
 # ╔═╡ c5c7cb86-041b-11eb-3360-45463105f3c9
 function do_experiment(p, N)
-	return [bernoulli(p) for i=1:N]
+	return [recovery_time(p) for i=1:N]
 end
 
 # ╔═╡ d8abd2f6-0416-11eb-1c2a-f9157d9760a7
@@ -169,10 +169,18 @@ As with any probability distribution, it should be normalised to $1$, in the sen
 """
 
 # ╔═╡ 105d347e-041c-11eb-2fc8-1d9e5eda2be0
-function frequencies(values)
-	
-	return missing
+function frequencies(vals)
+	freqs = Dict()
+	for val in vals
+		freqs[val] = get(freqs, val, 0) + 1
+	end
+	# map! modifies the array in place, unlike map which returns a brand new collection
+	map!(x -> x / length(vals), values(freqs)) 
+	return freqs
 end
+
+# ╔═╡ 94eb7443-be6b-45f6-b568-55467cd9144e
+frequencies([7, 8, 9, 7])
 
 # ╔═╡ 1ca7a8c2-041a-11eb-146a-15b8cdeaea72
 frequencies(small_experiment)
@@ -1049,6 +1057,7 @@ bigbreak
 # ╠═d8abd2f6-0416-11eb-1c2a-f9157d9760a7
 # ╟─771c8f0c-0403-11eb-097e-ab24d0714ad5
 # ╠═105d347e-041c-11eb-2fc8-1d9e5eda2be0
+# ╠═94eb7443-be6b-45f6-b568-55467cd9144e
 # ╠═1ca7a8c2-041a-11eb-146a-15b8cdeaea72
 # ╟─08e2bc64-0417-11eb-1457-21c0d18e8c51
 # ╟─77428072-0403-11eb-0068-81e3728f2ebe
