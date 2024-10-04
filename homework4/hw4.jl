@@ -182,6 +182,7 @@ end
 
 # ╔═╡ f1f89502-0494-11eb-2303-0b79d8bbd13f
 begin 
+	# import Statistics to get Stat functions like mean, std, etc
 	using Statistics
 	
 	function frequencies_plot_with_mean(data)
@@ -285,8 +286,14 @@ md"""
 👉 Write an interactive visualization that draws the histogram and mean for $p$ between $0.01$ (not $0$!) and $1$, and $N$ between $1$ and $100,000$, say. To avoid a naming conflict, call them `p_interactive` and `N_interactive`, instead of just `p` and `N`.
 """
 
-# ╔═╡ bb63f3cc-042f-11eb-04ff-a128aec3c378
+# ╔═╡ bc75ce7b-890b-40ba-b068-8ef7f55a758b
+@bind p_interactive Slider(0.01:0.01:1, show_value=true)
 
+# ╔═╡ bb63f3cc-042f-11eb-04ff-a128aec3c378
+@bind N_interactive Slider(1:100_000, show_value=true)
+
+# ╔═╡ 12950167-9705-4dcc-8c53-a7e30ff410af
+frequencies_plot_with_mean(do_experiment(p_interactive, N_interactive))
 
 # ╔═╡ bb8aeb58-042f-11eb-18b8-f995631df619
 md"""
@@ -1079,7 +1086,9 @@ bigbreak
 # ╠═f1f89502-0494-11eb-2303-0b79d8bbd13f
 # ╠═06089d1e-0495-11eb-0ace-a7a7dc60e5b2
 # ╟─77b54c10-0403-11eb-16ad-65374d29a817
+# ╠═bc75ce7b-890b-40ba-b068-8ef7f55a758b
 # ╠═bb63f3cc-042f-11eb-04ff-a128aec3c378
+# ╠═12950167-9705-4dcc-8c53-a7e30ff410af
 # ╟─bb8aeb58-042f-11eb-18b8-f995631df619
 # ╟─778ec25c-0403-11eb-3146-1d11c294bb1f
 # ╠═7bb8e426-0495-11eb-3a8b-cbbab61a1631
