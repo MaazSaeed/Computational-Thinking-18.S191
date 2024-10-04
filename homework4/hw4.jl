@@ -82,6 +82,9 @@ In this model, an individual who is infected has a constant probability $p$ to r
 
 """
 
+# ╔═╡ ae041fb4-fdbf-4995-b8a9-501f4f8a62b5
+rand(1:12, 20)
+
 # ╔═╡ 02b0c2fc-0415-11eb-2b40-7bca8ea4eef9
 function bernoulli(p::Number)
 	return rand() < p
@@ -1057,6 +1060,7 @@ bigbreak
 # ╟─1d3356c4-0403-11eb-0f48-01b5eb14a585
 # ╟─2b26dc42-0403-11eb-205f-cd2c23d8cb03
 # ╟─df8547b4-0400-11eb-07c6-fb370b61c2b6
+# ╠═ae041fb4-fdbf-4995-b8a9-501f4f8a62b5
 # ╠═02b0c2fc-0415-11eb-2b40-7bca8ea4eef9
 # ╟─b817f466-04d4-11eb-0a26-c1c667f9f7f7
 # ╟─76d117d4-0403-11eb-05d2-c5ea47d06f43
