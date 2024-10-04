@@ -172,11 +172,25 @@ As with any probability distribution, it should be normalised to $1$, in the sen
 function frequencies(vals)
 	freqs = Dict()
 	for val in vals
+		# if the key exists then increment its current value, otherwise set it to 1
 		freqs[val] = get(freqs, val, 0) + 1
 	end
 	# map! modifies the array in place, unlike map which returns a brand new collection
 	map!(x -> x / length(vals), values(freqs)) 
 	return freqs
+end
+
+# ╔═╡ f1f89502-0494-11eb-2303-0b79d8bbd13f
+begin 
+	using Statistics
+	
+	function frequencies_plot_with_mean(data)
+		# start out by copying the frequencies_plot_with_maximum function
+		base = bar(frequencies(data))
+		vline!(base, [mean(data)], label="maximum")
+		
+		return base
+	end
 end
 
 # ╔═╡ 94eb7443-be6b-45f6-b568-55467cd9144e
@@ -262,13 +276,6 @@ $(html"<span id=note_about_plotting></span>")
 md"""
 👉 Write the function `frequencies_plot_with_mean` that calculates the mean recovery time and displays it using a vertical line. 
 """
-
-# ╔═╡ f1f89502-0494-11eb-2303-0b79d8bbd13f
-function frequencies_plot_with_mean(data)
-	# start out by copying the frequencies_plot_with_maximum function
-	
-	return missing
-end
 
 # ╔═╡ 06089d1e-0495-11eb-0ace-a7a7dc60e5b2
 frequencies_plot_with_mean(large_experiment)
