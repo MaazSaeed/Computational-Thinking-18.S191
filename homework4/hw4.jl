@@ -127,7 +127,8 @@ md"""
 
 # ╔═╡ 73047bba-0416-11eb-1047-23e9c3dbde05
 interpretation_of_p_equals_one = md"""
-blablabla
+bernoulli function will always return true, as the rand() function produces values
+between 0 and 1 exclusive. Thereby the patient will recover one day one 100% of the time
 """
 
 # ╔═╡ 76f62d64-0403-11eb-27e2-3de58366b619
@@ -138,8 +139,7 @@ md"""
 
 # ╔═╡ c5c7cb86-041b-11eb-3360-45463105f3c9
 function do_experiment(p, N)
-	
-	return missing
+	return [bernoulli(p) for i=1:N]
 end
 
 # ╔═╡ d8abd2f6-0416-11eb-1c2a-f9157d9760a7
