@@ -497,7 +497,8 @@ $(html"<span id=interactfunction></span>")
 
 # ╔═╡ 406aabea-04a5-11eb-06b8-312879457c42
 function interact!(agent::Agent, source::Agent, infection::InfectionRecovery)
-	
+	# Yikes just realised I could have used the set_status! function defined above
+	# ... but hey it is what it is
 	if agent.status == S && source.status == I
 		agent.status = bernoulli(infection.p_infection) == true ? I : S
 		
@@ -556,9 +557,17 @@ You should not use any global variables inside the functions: Each function must
 
 """
 
+# ╔═╡ 2e98fd93-beb2-497b-b743-d789ed24ac9c
+rand([Agent(S, 0), Agent(I, 1), Agent(R, 0)])
+
+# ╔═╡ 8af1969d-4f4f-43b1-a276-85fbc9e771f7
+rand(1:10, 2)
+
 # ╔═╡ 2ade2694-0425-11eb-2fb2-390da43d9695
 function step!(agents::Vector{Agent}, infection::AbstractInfection)
-	# your code here
+	random_choice = rand(1:length(agents), 2)
+	agent, source = agents[random_choice[1]], agents[random_choice[2]]
+	interact!(agent, source, infection)	
 end
 
 # ╔═╡ 955321de-0403-11eb-04ce-fb1670dfbb9e
@@ -568,7 +577,10 @@ md"""
 
 # ╔═╡ 46133a74-04b1-11eb-0b46-0bc74e564680
 function sweep!(agents::Vector{Agent}, infection::AbstractInfection)
-	# your code here
+	agents_len = length(agents)
+	for i=1:agents_len
+		step!(agents, infection)
+	end
 end
 
 # ╔═╡ 95771ce2-0403-11eb-3056-f1dc3a8b7ec3
@@ -588,10 +600,21 @@ _Feel free to store the counts in a different way, as long as the return type is
 
 # ╔═╡ 887d27fc-04bc-11eb-0ab9-eb95ef9607f8
 function simulation(N::Integer, T::Integer, infection::AbstractInfection)
-
-	# your code here
+	agents = generate_agents(N)
+	S_counts, I_counts, R_counts = zeros(T), zeros(T), zeros(T)
+	for i=1:T
+		sweep!(agents, infection)
+		# the colon is used to state that the status is a symbol
+		# and not a variable, which would refer to any local or global variable
+		# named status and hence raise an error if it does not exist
+		# which we do not want.
+		statuses = getfield.(agents, :status)
+		S_counts[i] += sum(statuses .== S)
+		I_counts[i] += sum(statuses .== I)
+		R_counts[i] += sum(statuses .== R)
+	end
 	
-	return (S=missing, I=missing, R=missing)
+	(S=S_counts, I=I_counts, R=R_counts )
 end
 
 # ╔═╡ b92f1cec-04ae-11eb-0072-3535d1118494
@@ -665,24 +688,10 @@ function repeat_simulations(N, T, infection, num_simulations)
 	end
 end
 
-# ╔═╡ 80c2cd88-04b1-11eb-326e-0120a39405ea
-simulations = repeat_simulations(100, 1000, InfectionRecovery(0.02, 0.002), 20)
-
 # ╔═╡ 80e6f1e0-04b1-11eb-0d4e-475f1d80c2bb
 md"""
 In the cell below, we plot the evolution of the number of $I$ individuals as a function of time for each of the simulations on the same plot using transparency (`alpha=0.5` inside the plot command).
 """
-
-# ╔═╡ 9cd2bb00-04b1-11eb-1d83-a703907141a7
-let
-	p = plot()
-	
-	for sim in simulations
-		plot!(p, 1:1000, sim.I, alpha=.5, label=nothing)
-	end
-	
-	p
-end
 
 # ╔═╡ 95c598d4-0403-11eb-2328-0175ed564915
 md"""
@@ -694,11 +703,18 @@ function sir_mean_plot(simulations::Vector{<:NamedTuple})
 	# you might need T for this function, here's a trick to get it:
 	T = length(first(simulations).S)
 	
-	return missing
+	p = plot()
+	
+	mean_infection = mean(map(x -> x.I, simulations))
+	mean_susceptible = mean(map(x -> x.S, simulations))
+	mean_recovered = mean(map(x -> x.R, simulations))
+	
+	plot!(p, 1:1000, mean_infection, alpha =.5, label=nothing, linewidth=3, color="red")
+	plot!(p, 1:1000, mean_susceptible, alpha =.5, label=nothing, linewidth=3, color="yellow")
+	plot!(p, 1:1000, mean_recovered, alpha =.5, label=nothing, linewidth=3, color="green")
+	
+	p
 end
-
-# ╔═╡ 7f635722-04d0-11eb-3209-4b603c9e843c
-sir_mean_plot(simulations)
 
 # ╔═╡ dfb99ace-04cf-11eb-0739-7d694c837d59
 md"""
@@ -706,6 +722,27 @@ md"""
 """
 
 # ╔═╡ 1c6aa208-04d1-11eb-0b87-cf429e6ff6d0
+@bind p_infection Slider(0.01:0.01:1, show_value=true)
+
+# ╔═╡ c67033cb-df18-431a-8900-71e6edd71e6c
+@bind p_recovery Slider(0.000:0.001:1, show_value=true)
+
+# ╔═╡ 9cd2bb00-04b1-11eb-1d83-a703907141a7
+let
+	p = plot()
+	
+	for sim in simulations
+		plot!(p, 1:1000, sim.I, alpha=.5, label=nothing)
+	end
+	mean_infections = mean(map(x -> x.I, simulations))
+	plot!(p, 1:1000, mean_infections, alpha =.5, label=nothing, linewidth=3, color="red")
+	p
+end
+
+# ╔═╡ 7f635722-04d0-11eb-3209-4b603c9e843c
+sir_mean_plot(simulations)
+
+# ╔═╡ 9f31f7d9-b102-4e25-b88a-cd5db70878f6
 
 
 # ╔═╡ 95eb9f88-0403-11eb-155b-7b2d3a07cff0
@@ -719,9 +756,21 @@ This should confirm that the distribution of $I$ at each step is pretty wide!
 function sir_mean_error_plot(simulations::Vector{<:NamedTuple})
 	# you might need T for this function, here's a trick to get it:
 	T = length(first(simulations).S)
-	
-	return missing
+	σₛ = std(map(x -> x.S, simulations))
+	σᵢ = std(map(x -> x.I, simulations))
+	σᵣ = std(map(x -> x.R, simulations))
+
+	p = plot()
+
+	plot!(p, 1:1000, σₛ, alpha =.5, label=nothing, linewidth=3, color="red")	
+	plot!(p, 1:1000, σᵢ, alpha =.5, label=nothing, linewidth=3, color="green")	
+	plot!(p, 1:1000, σᵣ, alpha =.5, label=nothing, linewidth=3, color="blue")	
+
+	p
 end
+
+# ╔═╡ af57de53-a9e1-4694-af6a-f00ae710e3bf
+sir_mean_error_plot(simulations)
 
 # ╔═╡ 9611ca24-0403-11eb-3582-b7e3bb243e62
 md"""
@@ -1078,6 +1127,15 @@ bigbreak
 # ╔═╡ 5689841e-0414-11eb-0492-63c77ddbd136
 bigbreak
 
+# ╔═╡ 80c2cd88-04b1-11eb-326e-0120a39405ea
+# ╠═╡ disabled = true
+#=╠═╡
+simulations = repeat_simulations(100, 1000, InfectionRecovery(0.02, 0.002), 20)
+  ╠═╡ =#
+
+# ╔═╡ abc7a4f2-7fb7-4950-8004-d09260e9c601
+simulations = repeat_simulations(100, 1000, InfectionRecovery(p_infection, p_recovery), 20)
+
 # ╔═╡ Cell order:
 # ╟─01341648-0403-11eb-2212-db450c299f35
 # ╟─03a85970-0403-11eb-334a-812b59c0905b
@@ -1166,6 +1224,8 @@ bigbreak
 # ╟─1491a078-04aa-11eb-0106-19a3cf1e94b0
 # ╟─f8e05d94-04ac-11eb-26d4-6f1d2c5ed272
 # ╟─619c8a10-0403-11eb-2e89-8b0974fb01d0
+# ╠═2e98fd93-beb2-497b-b743-d789ed24ac9c
+# ╠═8af1969d-4f4f-43b1-a276-85fbc9e771f7
 # ╠═2ade2694-0425-11eb-2fb2-390da43d9695
 # ╟─955321de-0403-11eb-04ce-fb1670dfbb9e
 # ╠═46133a74-04b1-11eb-0b46-0bc74e564680
@@ -1187,8 +1247,12 @@ bigbreak
 # ╠═7f635722-04d0-11eb-3209-4b603c9e843c
 # ╟─dfb99ace-04cf-11eb-0739-7d694c837d59
 # ╠═1c6aa208-04d1-11eb-0b87-cf429e6ff6d0
+# ╠═c67033cb-df18-431a-8900-71e6edd71e6c
+# ╠═abc7a4f2-7fb7-4950-8004-d09260e9c601
+# ╠═9f31f7d9-b102-4e25-b88a-cd5db70878f6
 # ╟─95eb9f88-0403-11eb-155b-7b2d3a07cff0
 # ╠═287ee7aa-0435-11eb-0ca3-951dbbe69404
+# ╠═af57de53-a9e1-4694-af6a-f00ae710e3bf
 # ╟─9611ca24-0403-11eb-3582-b7e3bb243e62
 # ╠═26e2978e-0435-11eb-0d61-25f552d2771e
 # ╟─9635c944-0403-11eb-3982-4df509f6a556
