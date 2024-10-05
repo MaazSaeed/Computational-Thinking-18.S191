@@ -429,6 +429,11 @@ function set_status!(agent::Agent, new_status::InfectionStatus)
 	agent.status = new_status
 end
 
+# ╔═╡ 8f061a1e-c96f-454f-af54-5486f96ba42a
+function set_num_infected!(agent::Agent, infected::Int64)
+	agent.num_infected = infected
+end
+
 # ╔═╡ 866299e8-0403-11eb-085d-2b93459cc141
 md"""
 👉 We will also need functions `is_susceptible` and `is_infected` that check if a given agent is in those respective states.
@@ -454,8 +459,9 @@ md"""
 
 # ╔═╡ 7946d83a-04a0-11eb-224b-2b315e87bc84
 function generate_agents(N::Integer)
-	
-	return missing
+	agents = [Agent(S, 0) for i=1:N] # Generate an array of agents
+	set_status!(agents[rand(1:N)], I) # Set one of the agent's status at random to I
+	return agents
 end
 
 # ╔═╡ 488771e2-049f-11eb-3b0a-0de260457731
@@ -491,7 +497,27 @@ $(html"<span id=interactfunction></span>")
 
 # ╔═╡ 406aabea-04a5-11eb-06b8-312879457c42
 function interact!(agent::Agent, source::Agent, infection::InfectionRecovery)
-	# your code here
+	
+	if agent.status == S && source.status == I
+		agent.status = bernoulli(infection.p_infection) == true ? I : S
+		
+		if agent.status == I
+			# Oh no our agent has been infected :/
+			source.num_infected += 1
+		end
+		
+		return
+	end
+
+
+	# If the agent is already infected then there is a chance of them recovering
+	if agent.status == I
+		agent.status = bernoulli(infection.p_recovery) ? R : I
+		return
+	end
+	
+	# Do nothing
+	return
 end
 
 # ╔═╡ b21475c6-04ac-11eb-1366-f3b5e967402d
@@ -1119,6 +1145,7 @@ bigbreak
 # ╠═82f2580a-04c8-11eb-1eea-bdb4e50eee3b
 # ╟─8631a536-0403-11eb-0379-bb2e56927727
 # ╠═98beb336-0425-11eb-3886-4f8cfd210288
+# ╠═8f061a1e-c96f-454f-af54-5486f96ba42a
 # ╟─7c515a7a-04d5-11eb-0f36-4fcebff709d5
 # ╟─866299e8-0403-11eb-085d-2b93459cc141
 # ╠═9a837b52-0425-11eb-231f-a74405ff6e23
