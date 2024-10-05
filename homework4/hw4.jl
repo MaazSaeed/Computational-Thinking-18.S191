@@ -378,9 +378,12 @@ For each agent we want to keep track of its infection status and the number of *
 """
 
 # ╔═╡ ae4ac4b4-041f-11eb-14f5-1bcde35d18f2
-mutable struct Agent
-	status::InfectionStatus
-	num_infected::Int64
+begin
+	mutable struct Agent
+		status::InfectionStatus
+		num_infected::Int64
+	end
+	Agent() = (S, 0) # Outer Constructor
 end
 
 # ╔═╡ ae70625a-041f-11eb-3082-0753419d6d57
@@ -391,7 +394,7 @@ When you define a new type like this, Julia automatically defines one or more **
 """
 
 # ╔═╡ 60a8b708-04c8-11eb-37b1-3daec644ac90
-
+methods(Agent)
 
 # ╔═╡ 189cae1e-0424-11eb-2666-65bf297d8bdd
 md"""
@@ -399,7 +402,7 @@ md"""
 """
 
 # ╔═╡ 18d308c4-0424-11eb-176d-49feec6889cf
-test_agent = missing
+test_agent = Agent(S, 0)
 
 # ╔═╡ 190deebc-0424-11eb-19fe-615997093e14
 md"""
@@ -423,8 +426,7 @@ md"""
 
 # ╔═╡ 98beb336-0425-11eb-3886-4f8cfd210288
 function set_status!(agent::Agent, new_status::InfectionStatus)
-	
-	# your code here
+	agent.status = new_status
 end
 
 # ╔═╡ 866299e8-0403-11eb-085d-2b93459cc141
@@ -435,14 +437,12 @@ md"""
 
 # ╔═╡ 9a837b52-0425-11eb-231f-a74405ff6e23
 function is_susceptible(agent::Agent)
-	
-	return missing
+	agent.status == S
 end
 
 # ╔═╡ a8dd5cae-0425-11eb-119c-bfcbf832d695
 function is_infected(agent::Agent)
-	
-	return missing
+	agent.status == I
 end
 
 # ╔═╡ 8692bf42-0403-11eb-191f-b7d08895274f
