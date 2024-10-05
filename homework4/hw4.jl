@@ -495,47 +495,10 @@ md"""
 $(html"<span id=interactfunction></span>")
 """
 
-# ╔═╡ 406aabea-04a5-11eb-06b8-312879457c42
-function interact!(agent::Agent, source::Agent, infection::InfectionRecovery)
-	# Yikes just realised I could have used the set_status! function defined above
-	# ... but hey it is what it is
-	if agent.status == S && source.status == I
-		agent.status = bernoulli(infection.p_infection) == true ? I : S
-		
-		if agent.status == I
-			# Oh no our agent has been infected :/
-			source.num_infected += 1
-		end
-		
-		return
-	end
-
-
-	# If the agent is already infected then there is a chance of them recovering
-	if agent.status == I
-		agent.status = bernoulli(infection.p_recovery) ? R : I
-		return
-	end
-	
-	# Do nothing
-	return
-end
-
 # ╔═╡ b21475c6-04ac-11eb-1366-f3b5e967402d
 md"""
 Play around with the test case below to test your function! Try changing the definitions of `agent`, `source` and `infection`. Since we are working with randomness, you might want to run the cell multiple times.
 """
-
-# ╔═╡ 9c39974c-04a5-11eb-184d-317eb542452c
-let
-	agent = Agent(S, 0)
-	source = Agent(I, 0)
-	infection = InfectionRecovery(0.9, 0.5)
-	
-	interact!(agent, source, infection)
-	
-	(agent=agent, source=source)
-end
 
 # ╔═╡ 619c8a10-0403-11eb-2e89-8b0974fb01d0
 md"""
@@ -563,25 +526,10 @@ rand([Agent(S, 0), Agent(I, 1), Agent(R, 0)])
 # ╔═╡ 8af1969d-4f4f-43b1-a276-85fbc9e771f7
 rand(1:10, 2)
 
-# ╔═╡ 2ade2694-0425-11eb-2fb2-390da43d9695
-function step!(agents::Vector{Agent}, infection::AbstractInfection)
-	random_choice = rand(1:length(agents), 2)
-	agent, source = agents[random_choice[1]], agents[random_choice[2]]
-	interact!(agent, source, infection)	
-end
-
 # ╔═╡ 955321de-0403-11eb-04ce-fb1670dfbb9e
 md"""
 👉 Write a function `sweep!`. It runs `step!` $N$ times, where $N$ is the number of agents. Thus each agent acts, on average, once per sweep; a sweep is thus the unit of time in our Monte Carlo simulation.
 """
-
-# ╔═╡ 46133a74-04b1-11eb-0b46-0bc74e564680
-function sweep!(agents::Vector{Agent}, infection::AbstractInfection)
-	agents_len = length(agents)
-	for i=1:agents_len
-		step!(agents, infection)
-	end
-end
 
 # ╔═╡ 95771ce2-0403-11eb-3056-f1dc3a8b7ec3
 md"""
@@ -598,46 +546,8 @@ You've seen an example of named tuples before: the `student` variable at the top
 _Feel free to store the counts in a different way, as long as the return type is the same._
 """
 
-# ╔═╡ 887d27fc-04bc-11eb-0ab9-eb95ef9607f8
-function simulation(N::Integer, T::Integer, infection::AbstractInfection)
-	agents = generate_agents(N)
-	S_counts, I_counts, R_counts = zeros(T), zeros(T), zeros(T)
-	for i=1:T
-		sweep!(agents, infection)
-		# the colon is used to state that the status is a symbol
-		# and not a variable, which would refer to any local or global variable
-		# named status and hence raise an error if it does not exist
-		# which we do not want.
-		statuses = getfield.(agents, :status)
-		S_counts[i] += sum(statuses .== S)
-		I_counts[i] += sum(statuses .== I)
-		R_counts[i] += sum(statuses .== R)
-	end
-	
-	(S=S_counts, I=I_counts, R=R_counts )
-end
-
-# ╔═╡ b92f1cec-04ae-11eb-0072-3535d1118494
-simulation(3, 20, InfectionRecovery(0.9, 0.2))
-
-# ╔═╡ 2c62b4ae-04b3-11eb-0080-a1035a7e31a2
-simulation(100, 1000, InfectionRecovery(0.005, 0.2))
-
 # ╔═╡ 28db9d98-04ca-11eb-3606-9fb89fa62f36
 @bind run_basic_sir Button("Run simulation again!")
-
-# ╔═╡ c5156c72-04af-11eb-1106-b13969b036ca
-let
-	run_basic_sir
-	
-	N = 100
-	T = 1000
-	sim = simulation(N, T, InfectionRecovery(0.02, 0.002))
-	
-	result = plot(1:T, sim.S, ylim=(0, N), label="Susceptible")
-	plot!(result, 1:T, sim.I, ylim=(0, N), label="Infectious")
-	plot!(result, 1:T, sim.R, ylim=(0, N), label="Recovered")
-end
 
 # ╔═╡ 0a967f38-0493-11eb-0624-77e40b24d757
 md"""
@@ -678,16 +588,6 @@ Instead of pressing the button many times, let's have the computer repeat the si
 Every single simulation returns a named tuple with the status counts, so the result of multiple simulations will be an array of those. Have a look inside the result, `simulations`, and make sure that its structure is clear.
 """
 
-# ╔═╡ 38b1aa5a-04cf-11eb-11a2-930741fc9076
-function repeat_simulations(N, T, infection, num_simulations)
-	N = 100
-	T = 1000
-	
-	map(1:num_simulations) do _
-		simulation(N, T, infection)
-	end
-end
-
 # ╔═╡ 80e6f1e0-04b1-11eb-0d4e-475f1d80c2bb
 md"""
 In the cell below, we plot the evolution of the number of $I$ individuals as a function of time for each of the simulations on the same plot using transparency (`alpha=0.5` inside the plot command).
@@ -727,21 +627,6 @@ md"""
 # ╔═╡ c67033cb-df18-431a-8900-71e6edd71e6c
 @bind p_recovery Slider(0.000:0.001:1, show_value=true)
 
-# ╔═╡ 9cd2bb00-04b1-11eb-1d83-a703907141a7
-let
-	p = plot()
-	
-	for sim in simulations
-		plot!(p, 1:1000, sim.I, alpha=.5, label=nothing)
-	end
-	mean_infections = mean(map(x -> x.I, simulations))
-	plot!(p, 1:1000, mean_infections, alpha =.5, label=nothing, linewidth=3, color="red")
-	p
-end
-
-# ╔═╡ 7f635722-04d0-11eb-3209-4b603c9e843c
-sir_mean_plot(simulations)
-
 # ╔═╡ 9f31f7d9-b102-4e25-b88a-cd5db70878f6
 
 
@@ -756,9 +641,9 @@ This should confirm that the distribution of $I$ at each step is pretty wide!
 function sir_mean_error_plot(simulations::Vector{<:NamedTuple})
 	# you might need T for this function, here's a trick to get it:
 	T = length(first(simulations).S)
-	σₛ = std(map(x -> x.S, simulations))
-	σᵢ = std(map(x -> x.I, simulations))
-	σᵣ = std(map(x -> x.R, simulations))
+	σₛ = std(map(x -> x.S, simulations), corrected=true)
+	σᵢ = std(map(x -> x.I, simulations), corrected=true)
+	σᵣ = std(map(x -> x.R, simulations), corrected=true)
 
 	p = plot()
 
@@ -768,9 +653,6 @@ function sir_mean_error_plot(simulations::Vector{<:NamedTuple})
 
 	p
 end
-
-# ╔═╡ af57de53-a9e1-4694-af6a-f00ae710e3bf
-sir_mean_error_plot(simulations)
 
 # ╔═╡ 9611ca24-0403-11eb-3582-b7e3bb243e62
 md"""
@@ -806,7 +688,148 @@ This new type `Reinfection` should also be a **subtype** of `AbstractInfection`.
 """
 
 # ╔═╡ 8dd97820-04a5-11eb-36c0-8f92d4b859a8
+mutable struct Reinfection <: AbstractInfection
+	p_infection
+	p_recovery
+end
 
+# ╔═╡ 406aabea-04a5-11eb-06b8-312879457c42
+begin
+	
+	function interact!(agent::Agent, source::Agent, infection::InfectionRecovery)
+		# Yikes just realised I could have used the set_status! function defined above
+		# ... but hey it is what it is
+		if agent.status == S && source.status == I
+			agent.status = bernoulli(infection.p_infection) ? I : S
+			
+			if agent.status == I
+				# Oh no our agent has been infected :/
+				source.num_infected += 1
+			end
+			
+			return
+		end
+	
+	
+		# If the agent is already infected then there is a chance of them recovering
+		if agent.status == I
+			agent.status = bernoulli(infection.p_recovery) ? R : I
+			return
+		end
+		
+		return
+	end
+
+	function interact!(agent::Agent, source::Agent, infection::Reinfection)
+		if agent.status == I
+			agent.status = bernoulli(infection.p_recovery) ? S : I
+			return
+		end
+
+		if agent.status == S && source.status == I
+			agent.status = bernoulli(infection.p_infection) ? I : S
+			if agent.status == I
+				source.num_infected += 1
+			end
+			return
+		end
+		
+	end
+
+	
+end
+
+# ╔═╡ 9c39974c-04a5-11eb-184d-317eb542452c
+let
+	agent = Agent(S, 0)
+	source = Agent(I, 0)
+	infection = InfectionRecovery(0.9, 0.5)
+	
+	interact!(agent, source, infection)
+	
+	(agent=agent, source=source)
+end
+
+# ╔═╡ 2ade2694-0425-11eb-2fb2-390da43d9695
+function step!(agents::Vector{Agent}, infection::AbstractInfection)
+	random_choice = rand(1:length(agents), 2)
+	agent, source = agents[random_choice[1]], agents[random_choice[2]]
+	interact!(agent, source, infection)	
+end
+
+# ╔═╡ 46133a74-04b1-11eb-0b46-0bc74e564680
+function sweep!(agents::Vector{Agent}, infection::AbstractInfection)
+	agents_len = length(agents)
+	for i=1:agents_len
+		step!(agents, infection)
+	end
+end
+
+# ╔═╡ 887d27fc-04bc-11eb-0ab9-eb95ef9607f8
+function simulation(N::Integer, T::Integer, infection::AbstractInfection)
+	agents = generate_agents(N)
+	S_counts, I_counts, R_counts = zeros(T), zeros(T), zeros(T)
+	for i=1:T
+		sweep!(agents, infection)
+		# the colon is used to state that the status is a symbol
+		# and not a variable, which would refer to any local or global variable
+		# named status and hence raise an error if it does not exist
+		# which we do not want.
+		statuses = getfield.(agents, :status)
+		S_counts[i] += sum(statuses .== S)
+		I_counts[i] += sum(statuses .== I)
+		R_counts[i] += sum(statuses .== R)
+	end
+	
+	(S=S_counts, I=I_counts, R=R_counts )
+end
+
+# ╔═╡ b92f1cec-04ae-11eb-0072-3535d1118494
+simulation(3, 20, InfectionRecovery(0.9, 0.2))
+
+# ╔═╡ 2c62b4ae-04b3-11eb-0080-a1035a7e31a2
+simulation(100, 1000, InfectionRecovery(0.005, 0.2))
+
+# ╔═╡ c5156c72-04af-11eb-1106-b13969b036ca
+let
+	run_basic_sir
+	
+	N = 100
+	T = 1000
+	sim = simulation(N, T, InfectionRecovery(0.02, 0.002))
+	
+	result = plot(1:T, sim.S, ylim=(0, N), label="Susceptible")
+	plot!(result, 1:T, sim.I, ylim=(0, N), label="Infectious")
+	plot!(result, 1:T, sim.R, ylim=(0, N), label="Recovered")
+end
+
+# ╔═╡ 38b1aa5a-04cf-11eb-11a2-930741fc9076
+function repeat_simulations(N, T, infection, num_simulations)
+	N = 100
+	T = 1000
+	
+	map(1:num_simulations) do _
+		simulation(N, T, infection)
+	end
+end
+
+# ╔═╡ 9cd2bb00-04b1-11eb-1d83-a703907141a7
+let
+	p = plot()
+	
+	for sim in simulations
+		plot!(p, 1:1000, sim.I, alpha=.5, label=nothing)
+	end
+	mean_infections = mean(map(x -> x.I, simulations))
+	plot!(p, 1:1000, mean_infections, alpha =.5, label=nothing, linewidth=3, color="red")
+	p
+end
+
+# ╔═╡ 7f635722-04d0-11eb-3209-4b603c9e843c
+sir_mean_plot(simulations)
+
+# ╔═╡ af57de53-a9e1-4694-af6a-f00ae710e3bf
+sir_mean_error_plot(simulations)
 
 # ╔═╡ 99ef7b2a-0403-11eb-08ef-e1023cd151ae
 md"""
@@ -826,7 +849,7 @@ Note that you should be able to re-use the `sweep!` and `simulation` functions ,
 """
 
 # ╔═╡ 1ac4b33a-0435-11eb-36f8-8f3f81ae7844
-
+reinfection_simulations = repeat_simulations(100, 1000, Reinfection(p_infection, p_recovery), 20)
 
 # ╔═╡ 9a377b32-0403-11eb-2799-e7e59caa6a45
 md"""
@@ -836,6 +859,11 @@ md"""
 """
 
 # ╔═╡ 21c50840-0435-11eb-1307-7138ecde0691
+begin
+	sir_mean_error_plot(reinfection_simulations)
+end
+
+# ╔═╡ 82a84d8b-e795-4275-8fbc-1275eacbc4d6
 
 
 # ╔═╡ da49710e-0420-11eb-092e-4f1173868738
@@ -1264,6 +1292,7 @@ simulations = repeat_simulations(100, 1000, InfectionRecovery(p_infection, p_rec
 # ╠═1ac4b33a-0435-11eb-36f8-8f3f81ae7844
 # ╟─9a377b32-0403-11eb-2799-e7e59caa6a45
 # ╠═21c50840-0435-11eb-1307-7138ecde0691
+# ╠═82a84d8b-e795-4275-8fbc-1275eacbc4d6
 # ╟─da49710e-0420-11eb-092e-4f1173868738
 # ╠═e6219c7c-0420-11eb-3faa-13126f7c8007
 # ╟─5689841e-0414-11eb-0492-63c77ddbd136
