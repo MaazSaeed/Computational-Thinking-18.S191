@@ -352,7 +352,7 @@ We have just defined a new type `InfectionStatus`, as well as names `S`, `I` and
 """
 
 # ╔═╡ 7f4e121c-041d-11eb-0dff-cd0cbfdfd606
-test_status = missing
+test_status = S
 
 # ╔═╡ 7f744644-041d-11eb-08a0-3719cc0adeb7
 md"""
@@ -360,12 +360,15 @@ md"""
 """
 
 # ╔═╡ 88c53208-041d-11eb-3b1e-31b57ba99f05
-
+typeof(test_status)
 
 # ╔═╡ 847d0fc2-041d-11eb-2864-79066e223b45
 md"""
 👉 Convert `x` to an integer using the `Integer` function. What value does it have? What values do `I` and `R` have?
 """
+
+# ╔═╡ 48cf1d76-e106-4365-9cac-d71277769382
+Int(test_status)
 
 # ╔═╡ 860790fc-0403-11eb-2f2e-355f77dcc7af
 md"""
@@ -1105,6 +1108,7 @@ bigbreak
 # ╟─7f744644-041d-11eb-08a0-3719cc0adeb7
 # ╠═88c53208-041d-11eb-3b1e-31b57ba99f05
 # ╟─847d0fc2-041d-11eb-2864-79066e223b45
+# ╠═48cf1d76-e106-4365-9cac-d71277769382
 # ╟─860790fc-0403-11eb-2f2e-355f77dcc7af
 # ╠═ae4ac4b4-041f-11eb-14f5-1bcde35d18f2
 # ╟─ae70625a-041f-11eb-3082-0753419d6d57
