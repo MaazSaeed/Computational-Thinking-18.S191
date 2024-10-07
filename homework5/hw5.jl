@@ -476,9 +476,26 @@ Write a function `interact!` that takes two `Agent`s and a `CollisionInfectionRe
 """
 
 # ╔═╡ d1bcd5c4-0a4b-11eb-1218-7531e367a7ff
-#function interact!(agent::Agent, source::Agent, infection::CollisionInfectionRecovery)
-	#missing
-#end
+function interact!(agent::Agent, source::Agent, infection::CollisionInfectionRecovery)
+
+	ax, ay = make_tuple(agent.position)
+	sx, sy = make_tuple(source.position)
+
+	# if agent is susceptible and the infected source and agent are at the same position and there is a good chance then infect the agent :/
+	infect = agent.status == S && source.status == I &&
+	agent.position == source.position &&
+	rand() < infection.p_infection
+
+	if infect 
+		agent.status = I
+		return
+	end
+
+	# if the agent is infected and they have a good chance to recover then set their status to recovered (R) otherwise keep their current status intact
+	agent.status = agent.status == I && rand() < infection.p_recovery ? R : agent.status
+
+	return 
+end
 
 # ╔═╡ 34778744-0a5f-11eb-22b6-abe8b8fc34fd
 md"""
