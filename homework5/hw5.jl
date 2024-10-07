@@ -370,7 +370,13 @@ Let's define a type `Agent`. `Agent` contains a `position` (of type `Coordinate`
 @enum InfectionStatus S I R
 
 # ╔═╡ cf2f3b98-09a0-11eb-032a-49cc8c15e89c
-# define agent struct here:
+begin
+	mutable struct Agent
+		position::Coordinate
+		status::InfectionStatus
+	end
+	Agent() = Agent(Coordinate(0, 0), S)
+end
 
 # ╔═╡ 814e888a-0954-11eb-02e5-0964c7410d30
 md"""
@@ -381,13 +387,23 @@ It returns a `Vector` of `N` randomly generated `Agent`s. Their coordinates are 
 """
 
 # ╔═╡ 0cfae7ba-0a69-11eb-3690-d973d70e47f4
-# function initialize(N::Number, L::Number)
-	
-# 	return missing
-# end
+function initialize(N::Number, L::Number)
+	xcoords = rand(-L:L, N)
+	ycoords = rand(-L:L, N)
+
+	agents = []
+	infectious = rand(1:N) # Choose any agent at random
+	for i=1:N
+		status = i == infectious ? I : S
+		position = Coordinate(xcoords[i], ycoords[i])
+		push!(agents, Agent(position, status))
+	end
+
+	agents
+end
 
 # ╔═╡ 1d0f8eb4-0a46-11eb-38e7-63ecbadbfa20
-# initialize(3, 10)
+initialize(3, 10)
 
 # ╔═╡ e0b0880c-0a47-11eb-0db2-f760bbbf9c11
 # Color based on infection status
