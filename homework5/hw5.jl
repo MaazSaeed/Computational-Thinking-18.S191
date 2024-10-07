@@ -437,7 +437,7 @@ function visualize(agents::Vector, L)
 	p = plot()
 	positions = make_tuple.(position.(agents))
 	colors = color.(agents)
-	scatter(p, positions, color=colors, ratio=1)
+	scatter(p, positions, color=colors, ratio=1, legend=false)
 end
 
 # ╔═╡ 1f96c80a-0a46-11eb-0690-f51c60e57c3f
