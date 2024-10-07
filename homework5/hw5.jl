@@ -597,11 +597,13 @@ let
 	I_counts = []
 	R_counts = []
 	
-	for i=1:k_sweep_max*N
-		step!(agents, L, pandemic)
-		push!(S_counts, sum((x -> x.status).(agents).==S))
-		push!(I_counts, sum((x -> x.status).(agents).==I))
-		push!(R_counts, sum((x -> x.status).(agents).==R))
+	for i=1:k_sweep_max
+		for j=1:N
+			step!(agents, L, pandemic)
+		end
+		push!(S_counts, sum((agent -> agent.status).(agents).==S))
+		push!(I_counts, sum((agent -> agent.status).(agents).==I))
+		push!(R_counts, sum((agent -> agent.status).(agents).==R))
 	end
 
 	p = plot()
