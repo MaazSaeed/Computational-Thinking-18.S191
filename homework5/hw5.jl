@@ -591,7 +591,25 @@ let
 	N = 50
 	L = 30
 	
-	# agents = initialize(N, L)
+	agents = initialize(N, L)
+
+	S_counts = []
+	I_counts = []
+	R_counts = []
+	
+	for i=1:k_sweep_max*N
+		step!(agents, L, pandemic)
+		push!(S_counts, sum((x -> x.status).(agents).==S))
+		push!(I_counts, sum((x -> x.status).(agents).==I))
+		push!(R_counts, sum((x -> x.status).(agents).==R))
+	end
+
+	p = plot()
+	
+	plot!(p, S_counts, label="Susceptible")
+	plot!(p, I_counts, label="Infected")
+	plot!(p, R_counts, label="Recovered")
+	p
 	# compute k_sweep_max number of sweeps and plot the SIR
 end
 
