@@ -611,8 +611,8 @@ let
 	plot!(p, S_counts, label="Susceptible")
 	plot!(p, I_counts, label="Infected")
 	plot!(p, R_counts, label="Recovered")
+	
 	p
-	# compute k_sweep_max number of sweeps and plot the SIR
 end
 
 # ╔═╡ 201a3810-0a45-11eb-0ac9-a90419d0b723
