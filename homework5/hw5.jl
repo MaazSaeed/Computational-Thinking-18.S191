@@ -514,10 +514,24 @@ Your turn!
 """
 
 # ╔═╡ 24fe0f1a-0a69-11eb-29fe-5fb6cbf281b8
-# function step!(agents::Vector, L::Number, infection::AbstractInfection)
-	
-# 	return missing
-# end
+begin
+	# helper function to move the source a step
+	source_advance!(source, L)=
+		source.position = collide_boundary(source.position + rand(possible_moves), L)
+
+	function step!(agents::Vector, L::Number, infection::AbstractInfection)
+		
+		source_idx = rand(1:length(agents)) # Choose a source at random
+		source_advance!(agents[source_idx], L) # Move the source one step
+		
+		for (idx, agent) in enumerate(agents)
+			 if idx != source_idx
+				 interact!(agent, agents[source_idx], infection)
+			 end
+		end
+		
+	end
+end
 
 # ╔═╡ 1fc3271e-0a45-11eb-0e8d-0fd355f5846b
 md"""
@@ -543,15 +557,22 @@ pandemic = CollisionInfectionRecovery(0.5, 0.00001)
 @bind k_sweeps Slider(1:10000, default=1000)
 
 # ╔═╡ 778c2490-0a62-11eb-2a6c-e7fab01c6822
-# let
-# 	N = 50
-# 	L = 40
+let
+	N = 50
+ 	L = 40
+
+	agents = initialize(N, L) # Generate random agents with one of them infected and the rest are susceptible
+
+ 	plot_before = visualize(agents, L)
+
+	for _=1:k_sweeps*N
+		step!(agents, L, pandemic)
+	end
 	
-# 	plot_before = plot(1:3) # replace with your code
-# 	plot_after = plot(1:3)
+ 	plot_after = visualize(agents, L)
 	
-# 	plot(plot_before, plot_after)
-# end
+	plot(plot_before, plot_after)
+end
 
 # ╔═╡ e964c7f0-0a61-11eb-1782-0b728fab1db0
 md"""
