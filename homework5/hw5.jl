@@ -627,6 +627,9 @@ Let's make our plot come alive! There are two options to make our visualization 
 This an optional exercise, and our solution to 2️⃣ is given below.
 """
 
+# ╔═╡ db6b13a2-86cd-4edb-8c64-185e5f63ad8f
+@bind t Slider(1:10, show_value=true)
+
 # ╔═╡ e5040c9e-0a65-11eb-0f45-270ab8161871
 # let
 # 	N = 50
@@ -634,6 +637,38 @@ This an optional exercise, and our solution to 2️⃣ is given below.
 	
 # 	missing
 # end
+
+# ╔═╡ 8e82be44-c4c4-49c6-8bf3-03ebf43cde04
+let
+	N = 50
+	L = 40
+
+	agents = initialize(N, L)
+	
+	# initialize to empty arrays
+	Ss, Is, Rs = Int[], Int[], Int[]
+	
+	Tmax = 200
+	
+	@gif for t in 1:Tmax
+		for i in 1:50N
+			step!(agents, L, pandemic)
+		end
+
+		push!(Ss, sum((agent -> agent.status).(agents) .== S))
+		push!(Is, sum((agent -> agent.status).(agents) .== I))
+		push!(Rs, sum((agent -> agent.status).(agents) .== R))
+		
+		left = visualize(agents, L)
+	
+		right = plot(xlim=(1,Tmax), ylim=(1,N), size=(600,300))
+		plot!(right, 1:t, Ss, color=color(S), label="S")
+		plot!(right, 1:t, Is, color=color(I), label="I")
+		plot!(right, 1:t, Rs, color=color(R), label="R")
+	
+		plot(left, right)
+	end
+end
 
 # ╔═╡ 2031246c-0a45-11eb-18d3-573f336044bf
 md"""
@@ -1109,8 +1144,10 @@ bigbreak
 # ╠═ef27de84-0a63-11eb-177f-2197439374c5
 # ╟─8475baf0-0a63-11eb-1207-23f789d00802
 # ╟─201a3810-0a45-11eb-0ac9-a90419d0b723
+# ╠═db6b13a2-86cd-4edb-8c64-185e5f63ad8f
 # ╠═e5040c9e-0a65-11eb-0f45-270ab8161871
 # ╟─f9b9e242-0a53-11eb-0c6a-4d9985ef1687
+# ╠═8e82be44-c4c4-49c6-8bf3-03ebf43cde04
 # ╟─2031246c-0a45-11eb-18d3-573f336044bf
 # ╠═63dd9478-0a45-11eb-2340-6d3d00f9bb5f
 # ╠═269955e4-0a46-11eb-02cc-1946dc918bfa
