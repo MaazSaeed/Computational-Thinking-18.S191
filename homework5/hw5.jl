@@ -627,16 +627,42 @@ Let's make our plot come alive! There are two options to make our visualization 
 This an optional exercise, and our solution to 2️⃣ is given below.
 """
 
-# ╔═╡ db6b13a2-86cd-4edb-8c64-185e5f63ad8f
-@bind t Slider(1:10, show_value=true)
-
 # ╔═╡ e5040c9e-0a65-11eb-0f45-270ab8161871
-# let
-# 	N = 50
-# 	L = 30
+population, SIR_states = let
+	N = 50
+	L = 30
+
+	agents = initialize(N, L) # Generate Agents and infect one at random.
 	
-# 	missing
-# end
+	interm = [] # Storing the intermediate states of the agent for each iteration using deepcopy
+	S_counts, I_counts, R_counts = [], [], []
+	SIR_states = [] # Storing the S, I, and R state for the ith iteration
+	for i=1:k_sweep_max
+		for j=1:N
+			step!(agents, L, pandemic)
+		end
+		push!(S_counts, sum((agent -> agent.status).(agents).==S))
+		push!(I_counts, sum((agent -> agent.status).(agents).==I))
+		push!(R_counts, sum((agent -> agent.status).(agents).==R))
+		
+		push!(interm, deepcopy(agents))
+		push!(SIR_states, deepcopy((S_counts, I_counts, R_counts)))
+	end
+	interm, SIR_states
+end
+
+# ╔═╡ 10d98302-3ddc-433a-84e7-36d069b65efb
+@bind t Slider(1:10000, show_value=true)
+
+# ╔═╡ 3cac1629-6629-4a8b-8830-075708f285cf
+begin
+	p = plot()
+	
+	plot!(p, SIR_states[t][1], label="Susceptible")
+	plot!(p, SIR_states[t][2], label="Infected")
+	plot!(p, SIR_states[t][3], label="Recovered")
+	plot(p, visualize(population[t], 30))
+end
 
 # ╔═╡ 8e82be44-c4c4-49c6-8bf3-03ebf43cde04
 let
@@ -662,9 +688,9 @@ let
 		left = visualize(agents, L)
 	
 		right = plot(xlim=(1,Tmax), ylim=(1,N), size=(600,300))
-		plot!(right, 1:t, Ss, color=color(S), label="S")
-		plot!(right, 1:t, Is, color=color(I), label="I")
-		plot!(right, 1:t, Rs, color=color(R), label="R")
+		plot!(right, 1:t, Ss, color=color(S), label="Susceptible")
+		plot!(right, 1:t, Is, color=color(I), label="Infected")
+		plot!(right, 1:t, Rs, color=color(R), label="Recovered")
 	
 		plot(left, right)
 	end
@@ -1144,8 +1170,9 @@ bigbreak
 # ╠═ef27de84-0a63-11eb-177f-2197439374c5
 # ╟─8475baf0-0a63-11eb-1207-23f789d00802
 # ╟─201a3810-0a45-11eb-0ac9-a90419d0b723
-# ╠═db6b13a2-86cd-4edb-8c64-185e5f63ad8f
 # ╠═e5040c9e-0a65-11eb-0f45-270ab8161871
+# ╠═10d98302-3ddc-433a-84e7-36d069b65efb
+# ╠═3cac1629-6629-4a8b-8830-075708f285cf
 # ╟─f9b9e242-0a53-11eb-0c6a-4d9985ef1687
 # ╠═8e82be44-c4c4-49c6-8bf3-03ebf43cde04
 # ╟─2031246c-0a45-11eb-18d3-573f336044bf
