@@ -661,7 +661,8 @@ begin
 	plot!(p, SIR_states[t][1], label="Susceptible")
 	plot!(p, SIR_states[t][2], label="Infected")
 	plot!(p, SIR_states[t][3], label="Recovered")
-	plot(p, visualize(population[t], 30))
+	
+	plot(visualize(population[t], 30), p)
 end
 
 # ╔═╡ 8e82be44-c4c4-49c6-8bf3-03ebf43cde04
