@@ -845,11 +845,11 @@ In each step call `step!` 50N times.
 """
 
 # ╔═╡ 1f172700-0a42-11eb-353b-87c0039788bd
-social_scores, num_infected = let
+let
 	N = 50
 	L = 40
 
-	social_agents = initialize_social(N, L)
+	global social_agents = initialize_social(N, L)
 	Ss, Is, Rs = [], [], []
 	
 	Tmax = 200
@@ -879,9 +879,6 @@ social_scores, num_infected = let
 		# 4. place the SIR plot next to visualize.
 		# plot(left, right, size=(600,300)) # final plot
 	end
-
-	# return the social score and number of individuals infected as a tuple
-	((agent -> agent.social_score).(social_agents), (agent -> agent.num_infected).(social_agents))
 end
 
 # ╔═╡ b59de26c-0a41-11eb-2c67-b5f3c7780c91
@@ -892,7 +889,7 @@ md"""
 
 # ╔═╡ faec52a8-0a60-11eb-082a-f5787b09d88c
 let
-	scatter(social_scores, num_infected, xlabel="Social score", ylabel="Transmissions", marker=(:circle, 4), color=:red, legend=false)
+	scatter((a->a.social_score).(social_agents), (a->a.num_infected).(social_agents), xlabel="Social score", ylabel="Transmissions", marker=(:circle, 4), color=:red, legend=false)
 end
 
 # ╔═╡ b5b4d834-0a41-11eb-1b18-1bd626d18934
