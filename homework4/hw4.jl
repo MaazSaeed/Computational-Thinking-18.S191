@@ -814,6 +814,7 @@ function repeat_simulations(N, T, infection, num_simulations)
 end
 
 # ╔═╡ 9cd2bb00-04b1-11eb-1d83-a703907141a7
+#=╠═╡
 let
 	p = plot()
 	
@@ -824,12 +825,17 @@ let
 	plot!(p, 1:1000, mean_infections, alpha =.5, label=nothing, linewidth=3, color="red")
 	p
 end
+  ╠═╡ =#
 
 # ╔═╡ 7f635722-04d0-11eb-3209-4b603c9e843c
+#=╠═╡
 sir_mean_plot(simulations)
+  ╠═╡ =#
 
 # ╔═╡ af57de53-a9e1-4694-af6a-f00ae710e3bf
+#=╠═╡
 sir_mean_error_plot(simulations)
+  ╠═╡ =#
 
 # ╔═╡ 99ef7b2a-0403-11eb-08ef-e1023cd151ae
 md"""
@@ -1162,7 +1168,9 @@ simulations = repeat_simulations(100, 1000, InfectionRecovery(0.02, 0.002), 20)
   ╠═╡ =#
 
 # ╔═╡ abc7a4f2-7fb7-4950-8004-d09260e9c601
+#=╠═╡
 simulations = repeat_simulations(100, 1000, InfectionRecovery(p_infection, p_recovery), 20)
+  ╠═╡ =#
 
 # ╔═╡ Cell order:
 # ╟─01341648-0403-11eb-2212-db450c299f35
