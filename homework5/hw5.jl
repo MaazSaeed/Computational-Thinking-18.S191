@@ -809,7 +809,7 @@ let
 	Ss, Is, Rs = Int[], Int[], Int[]
 	
 	Tmax = 200
-	
+	pandemic = CollisionInfectionRecovery(0.5, 0.00001)
 	@gif for t in 1:Tmax
 		for i in 1:50N
 			step!(agents, L, pandemic)
@@ -900,8 +900,52 @@ md"""
 👉 Run a simulation for 100 steps, and then apply a "lockdown" where every agent's social score gets multiplied by 0.25, and then run a second simulation which runs on that same population from there.  What do you notice?  How does changing this factor form 0.25 to other numbers affect things?
 """
 
-# ╔═╡ a83c96e2-0a5a-11eb-0e58-15b5dda7d2d2
+# ╔═╡ 05941934-103f-40d0-8476-2862bb5b11d6
+@bind lockdown Slider(range(0.01, 1.0; step=0.01), show_value=true)
 
+# ╔═╡ a83c96e2-0a5a-11eb-0e58-15b5dda7d2d2
+let
+	# Apply lockdown to each agent after a 100 sims.
+	applyLockdown!(agent::SocialAgent) = agent.social_score *= lockdown
+
+	N = 50
+	L = 40
+
+	social_agents = initialize_social(N, L)
+	Ss, Is, Rs = [], [], []
+	
+	Tmax = 200
+	pandemic = CollisionInfectionRecovery(0.5, 0.00001)
+
+	@gif for t in 1:Tmax
+			for i in 1:50N
+				step!(social_agents, L, pandemic)
+			end
+
+			if t == 100
+				applyLockdown!.(social_agents)
+			end
+		
+			push!(Ss, sum((agent -> agent.status).(social_agents) .== S))
+			push!(Is, sum((agent -> agent.status).(social_agents) .== I))
+			push!(Rs, sum((agent -> agent.status).(social_agents) .== R))
+			
+			left = visualize(social_agents, L)
+		
+			right = plot(xlim=(1,Tmax), ylim=(1,N), size=(600,300))
+			plot!(right, 1:t, Ss, color=color(S), label="Susceptible")
+			plot!(right, 1:t, Is, color=color(I), label="Infected")
+			plot!(right, 1:t, Rs, color=color(R), label="Recovered")
+		
+			plot(left, right)
+
+		# 1. Step! a lot
+		# 2. Count S, I and R, push them to Ss Is Rs
+		# 3. call visualize on the agents,
+		# 4. place the SIR plot next to visualize.
+		# plot(left, right, size=(600,300)) # final plot
+	end
+end
 
 # ╔═╡ 05fc5634-09a0-11eb-038e-53d63c3edaf2
 md"""
@@ -1270,6 +1314,7 @@ bigbreak
 # ╟─b59de26c-0a41-11eb-2c67-b5f3c7780c91
 # ╠═faec52a8-0a60-11eb-082a-f5787b09d88c
 # ╟─b5b4d834-0a41-11eb-1b18-1bd626d18934
+# ╠═05941934-103f-40d0-8476-2862bb5b11d6
 # ╠═a83c96e2-0a5a-11eb-0e58-15b5dda7d2d2
 # ╟─05fc5634-09a0-11eb-038e-53d63c3edaf2
 # ╠═24c2fb0c-0a42-11eb-1a1a-f1246f3420ff
