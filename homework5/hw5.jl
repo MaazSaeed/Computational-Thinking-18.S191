@@ -898,7 +898,7 @@ md"""
 """
 
 # ╔═╡ 05941934-103f-40d0-8476-2862bb5b11d6
-@bind lockdown Slider(range(0.01, 1.0; step=0.01), show_value=true)
+@bind lockdown Slider(range(0.00, 1.0; step=0.01), show_value=true)
 
 # ╔═╡ a83c96e2-0a5a-11eb-0e58-15b5dda7d2d2
 let
@@ -919,8 +919,10 @@ let
 				step!(social_agents, L, pandemic)
 			end
 
-			if t == 100
+			if t == 25
+				print("HERE")
 				applyLockdown!.(social_agents)
+				print((a->a.social_score).(social_agents))
 			end
 		
 			push!(Ss, sum((agent -> agent.status).(social_agents) .== S))
