@@ -902,7 +902,7 @@ md"""
 
 # ╔═╡ a83c96e2-0a5a-11eb-0e58-15b5dda7d2d2
 let
-	# Apply lockdown to each agent after a 100 sims.
+	# Apply lockdown to each agent after a t sims.
 	applyLockdown!(agent::SocialAgent) = agent.social_score *= lockdown
 
 	N = 50
@@ -920,9 +920,7 @@ let
 			end
 
 			if t == 25
-				print("HERE")
 				applyLockdown!.(social_agents)
-				print((a->a.social_score).(social_agents))
 			end
 		
 			push!(Ss, sum((agent -> agent.status).(social_agents) .== S))
