@@ -172,6 +172,9 @@ The slider below controls ``h`` using a _log scale_. In the (mathematical) defin
 Notice that, as you decrease ``h``, the tangent line gets more accurate, but what happens if you make ``h`` too small?
 """
 
+# ╔═╡ 2f550b19-a01d-4121-9049-1f0fd2ddd581
+md"Due to floating point precision limitations when h becomes extremely small then due to the limitations of precision f(x+h) = f(x) which results in the numerator being zero and hence the derivative is zero, thus why we observe a horizontal line indicating slope of zero" 
+
 # ╔═╡ c9535ad6-10b9-11eb-0537-45f13931cd71
 @bind log_h Slider(-16:0.01:.5, default=-.5)
 
@@ -1268,6 +1271,7 @@ end
 # ╠═3d44c264-10b9-11eb-0895-dbfc22ba0c37
 # ╠═2b79b698-10b9-11eb-3bde-53fc1c48d5f7
 # ╟─a732bbcc-112c-11eb-1d65-110c049e226c
+# ╠═2f550b19-a01d-4121-9049-1f0fd2ddd581
 # ╟─c9535ad6-10b9-11eb-0537-45f13931cd71
 # ╟─7495af52-10ba-11eb-245f-a98781ba123c
 # ╟─327de976-10b9-11eb-1916-69ad75fc8dc4
