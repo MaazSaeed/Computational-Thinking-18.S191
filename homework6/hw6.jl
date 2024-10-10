@@ -238,7 +238,7 @@ md"""
 
 # ╔═╡ fff7754c-12c4-11eb-2521-052af1946b66
 function euler_integrate(fprime::Function, fa::Number, 
-		T::AbstractRange)
+		T::AbstractRange)::Vector{Float64}
 	
 	a0 = T[1]
 	h = step(T)
