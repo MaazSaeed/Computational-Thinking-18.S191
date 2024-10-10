@@ -224,9 +224,12 @@ Using this formula, we only need to know the _value_ ``f(a)`` and the _slope_ ``
 # ╔═╡ fa320028-12c4-11eb-0156-773e2aba8e58
 function euler_integrate_step(fprime::Function, fa::Number, 
 		a::Number, h::Number)
-	
-	return missing
+	# don't know why is this test case failing even though the formula is literally given
+	return h*fprime(a) + fa
 end
+
+# ╔═╡ 1d800829-b7de-41ee-95db-e933c09d1e10
+euler_integrate_step((x -> x^2), 4, 2, 2)
 
 # ╔═╡ 2335cae6-112f-11eb-3c2c-254e82014567
 md"""
@@ -239,8 +242,15 @@ function euler_integrate(fprime::Function, fa::Number,
 	
 	a0 = T[1]
 	h = step(T)
+	len_T = length(T)
+	antiderivative = Vector{Float64}(undef, len_T) 
+	for i=1:len_T
+		antiderivative[i] = euler_integrate_step(fprime, fa, a0, h)
+		fa = antiderivative[i]
+		a0 += h
+	end
 	
-	return missing
+	return antiderivative
 end
 
 # ╔═╡ 4d0efa66-12c6-11eb-2027-53d34c68d5b0
@@ -258,8 +268,11 @@ euler_test = let
 	euler_integrate(fprime, 0, T)
 end
 
+# ╔═╡ 799e470b-15bd-4d68-a92e-564ad84ee804
+
+
 # ╔═╡ ab72fdbe-10be-11eb-3b33-eb4ab41730d6
-@bind N_euler Slider(2:40)
+@bind N_euler Slider(2:900)
 
 # ╔═╡ d21fad2a-1253-11eb-304a-2bacf9064d0d
 md"""
@@ -1101,7 +1114,7 @@ end |> as_svg
 # ╔═╡ 990236e0-10be-11eb-333a-d3080a224d34
 let
 	a = 1
-	h = .3
+	h = .01
 	history = euler_integrate(wavy_deriv, wavy(a), range(a; step=h, length=N_euler))
 	
 	slope = wavy_deriv(a_euler)
@@ -1281,14 +1294,16 @@ end
 # ╟─70df9a48-10bb-11eb-0b95-95a224b45921
 # ╟─1d8ce3d6-112f-11eb-1343-079c18cdc89c
 # ╠═fa320028-12c4-11eb-0156-773e2aba8e58
-# ╟─3df7d63a-12c4-11eb-11ca-0b8db4bd9121
+# ╠═1d800829-b7de-41ee-95db-e933c09d1e10
+# ╠═3df7d63a-12c4-11eb-11ca-0b8db4bd9121
 # ╟─2335cae6-112f-11eb-3c2c-254e82014567
 # ╠═fff7754c-12c4-11eb-2521-052af1946b66
 # ╟─4d0efa66-12c6-11eb-2027-53d34c68d5b0
 # ╠═b74d94b8-10bf-11eb-38c1-9f39dfcb1096
 # ╟─15b50428-1264-11eb-163e-23e2f3590502
-# ╟─ab72fdbe-10be-11eb-3b33-eb4ab41730d6
-# ╟─990236e0-10be-11eb-333a-d3080a224d34
+# ╠═799e470b-15bd-4d68-a92e-564ad84ee804
+# ╠═ab72fdbe-10be-11eb-3b33-eb4ab41730d6
+# ╠═990236e0-10be-11eb-333a-d3080a224d34
 # ╟─d21fad2a-1253-11eb-304a-2bacf9064d0d
 # ╟─518fb3aa-106e-11eb-0fcd-31091a8f12db
 # ╠═1e5ca54e-12d8-11eb-18b8-39b909584c72
