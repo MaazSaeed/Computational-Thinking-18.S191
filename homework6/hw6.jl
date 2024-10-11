@@ -28,6 +28,12 @@ begin
 	using PlutoUI
 end
 
+# ╔═╡ e0fa1b50-9cc8-4ecb-a45a-71d16f5c7c52
+begin
+	Pkg.add("PlotlyBase")
+	Pkg.add("PlotlyKaleido")
+end
+
 # ╔═╡ 048890ee-106a-11eb-1a81-5744150543e8
 md"_homework 6, version 0_"
 
@@ -543,9 +549,15 @@ function gradient_descent_2d_step(f, x0, y0; η=0.01)
 end
 
 # ╔═╡ 8a114ca8-12e8-11eb-2de6-9149d1d3bc3d
-function gradient_descent_2d(f, x0, y0; η=0.01, N_steps=10000)
+function gradient_descent_2d(f, x0, y0; η=0.1, N_steps=2000)
+	for i=1:N_steps
+		x0, y0 = gradient_descent_2d_step(f, x0, y0; η)
+	end
+	return [x0, y0]
+	#=
 	x0, y0 = gradient_descent_2d_step(f, x0, y0; η)
 	N_steps > 0 ? gradient_descent_2d(f, x0, y0;η=η, N_steps=N_steps-1) : [x0, y0]
+	=# # Recursive code was leading to stack overflow
 end
 
 # ╔═╡ 4454c2b2-12e3-11eb-012c-c362c4676bf6
@@ -593,6 +605,9 @@ The iterative procedure by which we gradually adjust the parameter values to imp
 We generate a small dataset by throwing 10 dice, and counting the sum. We repeat this experiment many times, giving us a frequency distribution in a familiar shape.
 """
 
+# ╔═╡ 1f78e3c2-505b-41f6-90f0-9cf0ea23464b
+isequal(10)
+
 # ╔═╡ 65e691e4-124a-11eb-38b1-b1732403aa3d
 import Statistics
 
@@ -616,6 +631,9 @@ end
 
 # ╔═╡ dbe9635a-124b-11eb-111d-fb611954db56
 dice_x, dice_y = dice_frequencies(10, 20_000)
+
+# ╔═╡ fb3f8485-6d24-4821-a1d5-b19ba957b708
+@bind N_steps Slider(1:100000, show_value=true)
 
 # ╔═╡ 57090426-124e-11eb-0a17-1566ae96b7c2
 md"""
@@ -650,10 +668,13 @@ What we just did was adjusting the function parameters until we found the best p
 $$\mathcal{L}(\mu, \sigma) := \sum_i [f_{\mu, \sigma}(x_i) - y_i]^2$$
 """
 
+# ╔═╡ d1542e70-47bc-4644-a70c-e50538531adf
+((x, y) -> x + y).([1, 2, 3], [1, 2, 3])
+
 # ╔═╡ 2fc55daa-124f-11eb-399e-659e59148ef5
 function loss_dice(μ, σ)
-	
-	return missing
+	#sum([gauss(dice_x[i], μ, σ) - dice_y[i] for i=1:length(dice_x)].^2)
+	sum((gauss.(dice_x, μ, σ) .- dice_y) .^2)
 end
 
 # ╔═╡ 3a6ec2e4-124f-11eb-0f68-791475bab5cd
@@ -667,10 +688,8 @@ md"""
 
 # ╔═╡ a150fd60-124f-11eb-35d6-85104bcfd0fe
 found_μ, found_σ = let
-	
-	# your code here
-	
-	missing, missing
+	μ, σ = 30, 1
+	gradient_descent_2d(loss_dice, μ, σ)
 end
 
 # ╔═╡ ac320522-124b-11eb-1552-51c2adaf2521
@@ -755,10 +774,21 @@ This time, instead of comparing two vectors of numbers, we need to compare two v
 
 """
 
+# ╔═╡ 0339b71a-16ea-42c2-b09b-4d52e2fa78c4
+((x, y) -> x+y).(3, [1, 2])
+
 # ╔═╡ 754b5368-12e8-11eb-0763-e3ec56562c5f
 function loss_sir(β, γ)
-	
-	return missing
+	# Constructing f (approximation) with initial point f(a) taken from homework 4 results
+	approx_SIR = euler_SIR(β, γ, hw4_results[1], hw4_T)
+	# Use the loss function on the data
+	let
+		loss = 0
+		for i=1:length(approx_SIR)
+			loss += sum((approx_SIR[i] .- hw4_results[i]).^2)
+		end
+		loss
+	end
 end
 
 # ╔═╡ ee20199a-12d4-11eb-1c2c-3f571bbb232e
@@ -771,10 +801,7 @@ md"""
 
 # ╔═╡ 6e1b5b6a-12e8-11eb-3655-fb10c4566cdc
 found_β, found_γ = let
-	
-	# your code here
-	
-	missing, missing
+	gradient_descent_2d(loss_sir, guess_β, guess_γ, N_steps=2100, η=1e-8)
 end
 
 # ╔═╡ b94b7610-106d-11eb-2852-25337ce6ec3a
@@ -1368,6 +1395,7 @@ end
 # ╟─54a58f84-12e3-11eb-10b9-7d55a16c81ba
 # ╠═a0045046-1248-11eb-13bd-8b8ad861b29a
 # ╟─7e318fea-12e7-11eb-3490-b17e0d4dbc50
+# ╠═e0fa1b50-9cc8-4ecb-a45a-71d16f5c7c52
 # ╠═605aafa4-12e7-11eb-2d13-7f7db3fac439
 # ╟─9ae4ebac-12e3-11eb-0acc-23113f5264a9
 # ╟─5e0f16b4-12e3-11eb-212f-e565f97adfed
@@ -1375,16 +1403,19 @@ end
 # ╟─a03890d6-1248-11eb-37ee-85b0a5273e0c
 # ╠═6d1ee93e-1103-11eb-140f-63fca63f8b06
 # ╟─8261eb92-106e-11eb-2ccc-1348f232f5c3
+# ╠═1f78e3c2-505b-41f6-90f0-9cf0ea23464b
 # ╠═65e691e4-124a-11eb-38b1-b1732403aa3d
-# ╟─6f4aa432-1103-11eb-13da-fdd9eefc7c86
+# ╠═6f4aa432-1103-11eb-13da-fdd9eefc7c86
 # ╠═dbe9635a-124b-11eb-111d-fb611954db56
-# ╟─ac320522-124b-11eb-1552-51c2adaf2521
+# ╠═fb3f8485-6d24-4821-a1d5-b19ba957b708
+# ╠═ac320522-124b-11eb-1552-51c2adaf2521
 # ╟─57090426-124e-11eb-0a17-1566ae96b7c2
 # ╟─66192a74-124c-11eb-0c6a-d74aecb4c624
 # ╟─70f0fe9c-124c-11eb-3dc6-e102e68673d9
 # ╟─41b2262a-124e-11eb-2634-4385e2f3c6b6
 # ╠═0dea1f70-124c-11eb-1593-e535ab21976c
 # ╟─471cbd84-124c-11eb-356e-371d23011af5
+# ╠═d1542e70-47bc-4644-a70c-e50538531adf
 # ╠═2fc55daa-124f-11eb-399e-659e59148ef5
 # ╠═3a6ec2e4-124f-11eb-0f68-791475bab5cd
 # ╟─2fcb93aa-124f-11eb-10de-55fced6f4b83
@@ -1397,14 +1428,15 @@ end
 # ╟─6faf4074-1266-11eb-1a0a-991fc2e991bb
 # ╟─826bb0dc-106e-11eb-29eb-03e7ddf9e4b5
 # ╟─04364dee-12cb-11eb-2f94-bfd3fb405907
-# ╟─249c297c-12ce-11eb-2054-d1e926335148
+# ╠═249c297c-12ce-11eb-2054-d1e926335148
 # ╟─c56cc19c-12ca-11eb-3c6c-7f3ea98eeb4e
 # ╟─496b8816-12d3-11eb-3cec-c777ba81eb60
 # ╟─480fde46-12d4-11eb-2dfb-1b71692c7420
-# ╟─4837e1ae-12d2-11eb-0df9-21dcc1892fc9
-# ╟─a9630d28-12d2-11eb-196b-773d8498b0bb
+# ╠═4837e1ae-12d2-11eb-0df9-21dcc1892fc9
+# ╠═a9630d28-12d2-11eb-196b-773d8498b0bb
 # ╟─23c53be4-12d4-11eb-1d39-8d11b4431993
 # ╟─6016fccc-12d4-11eb-0f58-b9cd331cc7b3
+# ╠═0339b71a-16ea-42c2-b09b-4d52e2fa78c4
 # ╠═754b5368-12e8-11eb-0763-e3ec56562c5f
 # ╠═ee20199a-12d4-11eb-1c2c-3f571bbb232e
 # ╟─38b09bd8-12d5-11eb-2f7b-579e9db3973d
