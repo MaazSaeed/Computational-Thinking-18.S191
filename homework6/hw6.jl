@@ -490,7 +490,7 @@ We want to minimize a 1D function, i.e. a function $f: \mathbb{R} \to \mathbb{R}
 """
 
 # ╔═╡ a7f1829c-12e8-11eb-15a1-5de40ed92587
-function gradient_descent_1d_step(f, x0; η=0.01)
+function gradient_descent_1d_step(f, x0; η=0.025)
 	return -η*finite_difference_slope(f, x0) + x0
 end
 
@@ -499,11 +499,11 @@ let
 	f = x -> x^2
 	# the minimum is at 0, so we should take a small step to the left
 	
-	gradient_descent_1d_step(f, 5)
+	gradient_descent_1d_step(f,gradient_descent_1d_step(f,gradient_descent_1d_step(f,gradient_descent_1d_step(f,gradient_descent_1d_step(f,gradient_descent_1d_step(f,gradient_descent_1d_step(f, gradient_descent_1d_step(f, 1.5))))))))
 end
 
 # ╔═╡ 8ae98c74-12e0-11eb-2802-d9a544d8b7ae
-@bind N_gradient_1d Slider(0:20)
+@bind N_gradient_1d Slider(0:50, show_value=true)
 
 # ╔═╡ a53cf3f8-12e1-11eb-0b0c-2b794a7ac841
 md" ``x_0 = `` $(@bind x0_gradient_1d Slider(-3:.01:1.5, default=-1, show_value=true))"
@@ -1182,7 +1182,7 @@ end |> as_svg
 
 # ╔═╡ 90114f98-12e0-11eb-2011-a3207bbc24f6
 function gradient_1d_viz(N_gradient_1d, x0)
-	f = x -> x^4 + 3x^3 - 3x + 5.
+	f = x -> x^2
 	
 	x = LinRange(-3, 1.5, 200)
 	
@@ -1430,7 +1430,7 @@ end
 # ╟─04364dee-12cb-11eb-2f94-bfd3fb405907
 # ╠═249c297c-12ce-11eb-2054-d1e926335148
 # ╟─c56cc19c-12ca-11eb-3c6c-7f3ea98eeb4e
-# ╟─496b8816-12d3-11eb-3cec-c777ba81eb60
+# ╠═496b8816-12d3-11eb-3cec-c777ba81eb60
 # ╟─480fde46-12d4-11eb-2dfb-1b71692c7420
 # ╠═4837e1ae-12d2-11eb-0df9-21dcc1892fc9
 # ╠═a9630d28-12d2-11eb-196b-773d8498b0bb
