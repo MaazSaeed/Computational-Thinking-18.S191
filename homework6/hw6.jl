@@ -318,9 +318,9 @@ function euler_SIR_step(β, γ, sir_0::Vector, h::Number)
 	s, i, r = sir_0
 	
 	return [
-		missing,
-		missing,
-		missing,
+		s - h*β*s*i,
+		i + h*(β*s*i - γ*i),
+		r + h*γ*i,
 	]
 end
 
@@ -343,7 +343,7 @@ function euler_SIR(β, γ, sir_0::Vector, T::AbstractRange)
 	
 	num_steps = length(T)
 	
-	return missing
+	return [sir_0=euler_SIR_step(β, γ, sir_0, h) for i=1:num_steps]
 end
 
 # ╔═╡ 4b791b76-12cd-11eb-1260-039c938f5443
@@ -391,7 +391,13 @@ md"""
 """
 
 # ╔═╡ 68274534-1103-11eb-0d62-f1acb57721bc
+@bind β Slider(0.0:0.01:1, show_value=true) 
 
+# ╔═╡ f9286aab-afe6-4a8c-962f-7aab671076f0
+@bind γ Slider(0.0:0.01:1, show_value=true)
+
+# ╔═╡ 9a50f1f5-29ba-4a39-ac37-8abcaf4f9cae
+plot_sir!(plot(), 0:0.1:60.0, euler_SIR(β, γ, [0.99, 0.01, 0.00], 0 : 0.1 : 60.0))
 
 # ╔═╡ 82539bbe-106e-11eb-0e9e-170dfa6a7dad
 md"""
@@ -1313,12 +1319,14 @@ end
 # ╠═4b791b76-12cd-11eb-1260-039c938f5443
 # ╠═0a095a94-1245-11eb-001a-b908128532aa
 # ╟─51c9a25e-1244-11eb-014f-0bcce2273cee
-# ╟─58675b3c-1245-11eb-3548-c9cb8a6b3188
+# ╠═58675b3c-1245-11eb-3548-c9cb8a6b3188
 # ╟─b4bb4b3a-12ce-11eb-3fe5-ad7ccd73febb
 # ╟─586d0352-1245-11eb-2504-05d0aa2352c6
 # ╠═589b2b4c-1245-11eb-1ec7-693c6bda97c4
 # ╟─58b45a0e-1245-11eb-04d1-23a1f3a0f242
 # ╠═68274534-1103-11eb-0d62-f1acb57721bc
+# ╠═f9286aab-afe6-4a8c-962f-7aab671076f0
+# ╠═9a50f1f5-29ba-4a39-ac37-8abcaf4f9cae
 # ╟─82539bbe-106e-11eb-0e9e-170dfa6a7dad
 # ╟─b394b44e-1245-11eb-2f86-8d10113e8cfc
 # ╠═bd8522c6-12e8-11eb-306c-c764f78486ef
