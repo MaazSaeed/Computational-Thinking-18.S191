@@ -539,14 +539,13 @@ Multivariable calculus tells us that the gradient $\nabla f(a, b)$ at a point $(
 
 # ╔═╡ 852be3c4-12e8-11eb-1bbb-5fbc0da74567
 function gradient_descent_2d_step(f, x0, y0; η=0.01)
-	
-	return missing
+	return [x0, y0] .+ -η .* gradient(f, x0, y0)
 end
 
 # ╔═╡ 8a114ca8-12e8-11eb-2de6-9149d1d3bc3d
-function gradient_descent_2d(f, x0, y0; η=0.01)
-	
-	return missing
+function gradient_descent_2d(f, x0, y0; η=0.01, N_steps=10000)
+	x0, y0 = gradient_descent_2d_step(f, x0, y0; η)
+	N_steps > 0 ? gradient_descent_2d(f, x0, y0;η=η, N_steps=N_steps-1) : [x0, y0]
 end
 
 # ╔═╡ 4454c2b2-12e3-11eb-012c-c362c4676bf6
@@ -570,7 +569,7 @@ We also prepared a 3D visualisation if you like! It's a bit slow...
 """
 
 # ╔═╡ 605aafa4-12e7-11eb-2d13-7f7db3fac439
-run_3d_visualisation = false
+run_3d_visualisation = true
 
 # ╔═╡ a03890d6-1248-11eb-37ee-85b0a5273e0c
 md"""
