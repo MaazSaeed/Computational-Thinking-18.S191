@@ -485,8 +485,7 @@ We want to minimize a 1D function, i.e. a function $f: \mathbb{R} \to \mathbb{R}
 
 # ╔═╡ a7f1829c-12e8-11eb-15a1-5de40ed92587
 function gradient_descent_1d_step(f, x0; η=0.01)
-	
-	return missing
+	return -η*finite_difference_slope(f, x0) + x0
 end
 
 # ╔═╡ d33271a2-12df-11eb-172a-bd5600265f49
@@ -509,9 +508,8 @@ md"""
 """
 
 # ╔═╡ 9489009a-12e8-11eb-2fb7-97ba0bdf339c
-function gradient_descent_1d(f, x0; η=0.01, N_steps=1000)
-	
-	return missing
+function gradient_descent_1d(f, x0; η=0.01, N_steps=1000) 
+	N_steps > 0 ? gradient_descent_1d(f, gradient_descent_1d_step(f, x0, η=η);η=η, N_steps=N_steps-1) : x0
 end
 
 # ╔═╡ 34dc4b02-1248-11eb-26b2-5d2610cfeb41
@@ -1351,8 +1349,8 @@ end
 # ╠═a7f1829c-12e8-11eb-15a1-5de40ed92587
 # ╠═d33271a2-12df-11eb-172a-bd5600265f49
 # ╟─ed344a8c-12df-11eb-03a3-2922620fd20f
-# ╟─8ae98c74-12e0-11eb-2802-d9a544d8b7ae
-# ╟─88b30f10-12e1-11eb-383d-4f095625cd16
+# ╠═8ae98c74-12e0-11eb-2802-d9a544d8b7ae
+# ╠═88b30f10-12e1-11eb-383d-4f095625cd16
 # ╟─a53cf3f8-12e1-11eb-0b0c-2b794a7ac841
 # ╟─90114f98-12e0-11eb-2011-a3207bbc24f6
 # ╟─754e4c48-12df-11eb-3818-f54f6fc7176b
