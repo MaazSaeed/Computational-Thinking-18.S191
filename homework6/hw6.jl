@@ -781,7 +781,7 @@ This time, instead of comparing two vectors of numbers, we need to compare two v
 function loss_sir(β, γ)
 	# Constructing f (approximation) with initial point f(a) taken from homework 4 results
 	approx_SIR = euler_SIR(β, γ, hw4_results[1], hw4_T)
-	# Use the loss function on the data
+	# Use the loss function on the data and the approximation
 	let
 		loss = 0
 		for i=1:length(approx_SIR)
