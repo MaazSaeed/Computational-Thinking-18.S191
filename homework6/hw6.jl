@@ -313,6 +313,15 @@ r(t+h) &= r(t) + h\,\cdot \gamma i(t)
 `sir_0` is a 3-element vector, and you should return a new 3-element vector with the values after the timestep.
 """
 
+# ╔═╡ 3eb84431-228d-476e-b101-93f19bcef8d0
+md" ṡ = -βsi where s is the fraction of suceptible in a given population
+                   i is the fraction of infected
+                   β is the transmission rate
+        The negative sign indicates the rate at which the susceptible people transition to infectious state
+
+similiary for the i̇ refers to the rate of infection growing minus the people recovering, recovery rate is denoted by γ
+"
+
 # ╔═╡ 1e5ca54e-12d8-11eb-18b8-39b909584c72
 function euler_SIR_step(β, γ, sir_0::Vector, h::Number)
 	s, i, r = sir_0
@@ -421,7 +430,7 @@ You should use **anonymous functions** for this. These have the form `x -> x^2`,
 # ╔═╡ bd8522c6-12e8-11eb-306c-c764f78486ef
 function ∂x(f::Function, a, b)
 	
-	return missing
+	return finite_difference_slope(x -> f(x, b), a)
 end
 
 # ╔═╡ 321964ac-126d-11eb-0a04-0d3e3fb9b17c
@@ -432,8 +441,7 @@ end
 
 # ╔═╡ b7d3aa8c-12e8-11eb-3430-ff5d7df6a122
 function ∂y(f::Function, a, b)
-	
-	return missing
+	return finite_difference_slope(y -> f(a, y), b)
 end
 
 # ╔═╡ a15509ee-126c-11eb-1fa3-cdda55a47fcb
@@ -450,8 +458,7 @@ md"""
 
 # ╔═╡ adbf65fe-12e8-11eb-04e9-3d763ba91a63
 function gradient(f::Function, a, b)
-	
-	return missing
+	return [∂x(f, a, b), ∂y(f, a, b)]
 end
 
 # ╔═╡ 66b8e15e-126c-11eb-095e-39c2f6abc81d
@@ -1312,6 +1319,7 @@ end
 # ╠═990236e0-10be-11eb-333a-d3080a224d34
 # ╟─d21fad2a-1253-11eb-304a-2bacf9064d0d
 # ╟─518fb3aa-106e-11eb-0fcd-31091a8f12db
+# ╠═3eb84431-228d-476e-b101-93f19bcef8d0
 # ╠═1e5ca54e-12d8-11eb-18b8-39b909584c72
 # ╠═84daf7c4-1244-11eb-0382-d1da633a63e2
 # ╟─517efa24-1244-11eb-1f81-b7f95b87ce3b
