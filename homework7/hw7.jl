@@ -409,12 +409,6 @@ Our event-driven simulation is a stepping method, but instead of taking small st
 👉 Write a function `interact` that takes a photon and a `hit::Intersection{Wall}` and returns a new `Photon` at the next step. The new photon is located at the hit point, its direction is reflected off the wall's normal and the `photon.ior` is reused.
 """
 
-# ╔═╡ 2c6defd0-1ca1-11eb-17db-d5cb498f3265
-function interact(photon::Photon, hit::Intersection{Wall})
-	
-	return missing
-end
-
 # ╔═╡ 3f727a2c-1c80-11eb-3608-e55ccb9786d9
 md"""
 For convenience, we define a function `step_ray` that combines these two actions: it finds the closest hit and computes the interaction.
@@ -679,6 +673,17 @@ let
 	scatter!(p, test_closest.point[1:1], test_closest.point[2:2], label="Closest hit")
 	
 	p |> as_svg
+end
+
+# ╔═╡ 2c6defd0-1ca1-11eb-17db-d5cb498f3265
+function interact(photon::Photon, hit::Intersection{Wall})
+	dir = reflect(photon.l, hit.object.normal)
+	
+	intersection_point = intersection(photon, hit.object)
+	if intersection_point isa Miss
+		return photon
+	end
+	return Photon(intersection_point.point, dir, photon.ior)
 end
 
 # ╔═╡ af5c6bea-1c9c-11eb-35ae-250337e4fc86
