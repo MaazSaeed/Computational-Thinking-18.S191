@@ -360,15 +360,6 @@ By taking the minimum, we have found our closest hit! Let's turn this into a fun
 👉 Write a function `closest_hit` that takes a `photon` and a vector of objects. Calculate the vector of `Intersection`s/`Miss`es, and return the `minimum`.
 """
 
-# ╔═╡ 19cf420e-1c7c-11eb-1cb8-dd939fee1276
-function closest_hit(photon::Photon, objects::Vector{<:Object})
-	
-	return missing
-end
-
-# ╔═╡ b8cd4112-1c7c-11eb-3b2d-29170ad9beb5
-test_closest = closest_hit(philip, ex_1_scene)
-
 # ╔═╡ e9c6a0b8-1ad0-11eb-1606-0319caf0948a
 md"""
  $(html"<br><br><br><br>")
@@ -527,17 +518,6 @@ let
 	plot_photon_arrow!(p, philip, 5)
 end
 
-# ╔═╡ a99c40bc-1c7c-11eb-036b-7fe6e9b937e5
-let
-	p = plot_scene(ex_1_scene)
-	
-	plot_photon_arrow!(p, philip, 4; label="Philip")
-	
-	scatter!(p, test_closest.point[1:1], test_closest.point[2:2], label="Closest hit")
-	
-	p |> as_svg
-end
-
 # ╔═╡ 1ee0787e-1a08-11eb-233b-43a654f70117
 let
 	p = plot_scene(ex_1_scene, legend=false, xlim=(-11,11), ylim=(-11,11))
@@ -676,6 +656,25 @@ sort(all_intersections)
 
 # ╔═╡ 63ef21c6-1c7a-11eb-2f3c-c5ac16bc289f
 minimum(all_intersections)
+
+# ╔═╡ 19cf420e-1c7c-11eb-1cb8-dd939fee1276
+function closest_hit(photon::Photon, objects::Vector{<:Object})	
+	minimum(sort([intersection(photon, object) for object in objects]))
+end
+
+# ╔═╡ b8cd4112-1c7c-11eb-3b2d-29170ad9beb5
+test_closest = closest_hit(philip, ex_1_scene)
+
+# ╔═╡ a99c40bc-1c7c-11eb-036b-7fe6e9b937e5
+let
+	p = plot_scene(ex_1_scene)
+	
+	plot_photon_arrow!(p, philip, 4; label="Philip")
+	
+	scatter!(p, test_closest.point[1:1], test_closest.point[2:2], label="Closest hit")
+	
+	p |> as_svg
+end
 
 # ╔═╡ af5c6bea-1c9c-11eb-35ae-250337e4fc86
 test_sphere = Sphere(
@@ -1112,7 +1111,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─6cf7df1a-1c7a-11eb-230b-df1333f191c7
 # ╠═19cf420e-1c7c-11eb-1cb8-dd939fee1276
 # ╠═b8cd4112-1c7c-11eb-3b2d-29170ad9beb5
-# ╟─a99c40bc-1c7c-11eb-036b-7fe6e9b937e5
+# ╠═a99c40bc-1c7c-11eb-036b-7fe6e9b937e5
 # ╟─e9c6a0b8-1ad0-11eb-1606-0319caf0948a
 # ╟─522e6b22-194d-11eb-167c-052e65f6b703
 # ╟─dad5acfa-194c-11eb-27f9-01f40342a681
