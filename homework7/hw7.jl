@@ -235,6 +235,13 @@ We also could have used `Object` directly as the type for the field `object`, bu
 # ╔═╡ 9df1d0f2-1ac3-11eb-0eac-d90eccca669c
 test_intersection_1 = Intersection(test_wall, 3.0, [1.0,2.0])
 
+# ╔═╡ ba897f0d-368a-427b-b6ee-3cbb18313ddd
+#test_intersection_2 = Intersection(a_miss, 0.0, [1.0, 2.0])
+# In order for this to work, make sure that Miss is a subtype of Object
+
+# ╔═╡ 9b179f2c-8001-4f1f-ae6f-4da49da94f3c
+#typeof(test_intersection_2)
+
 # ╔═╡ bc10541e-1ac3-11eb-0b5f-916922f1a8e8
 typeof(test_intersection_1)
 
@@ -261,8 +268,7 @@ where $p$ is the position, $\hat \ell$ is the direction of the light, and $\hat 
 
 # ╔═╡ abe3de54-1ca0-11eb-01cd-11fe798bfb97
 function intersection_distance(photon::Photon, wall::Wall)
-	
-	return missing
+	-dot((photon.p .- wall.position), wall.normal) / dot(photon.l, wall.normal)
 end
 
 # ╔═╡ 42d65f56-1aca-11eb-1079-e32f85554349
@@ -1073,6 +1079,8 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╠═5a9d00f6-1ac3-11eb-01fb-53c35796e766
 # ╟─5aa7c4e8-1ac3-11eb-23f3-03bd58e75c4b
 # ╠═9df1d0f2-1ac3-11eb-0eac-d90eccca669c
+# ╠═ba897f0d-368a-427b-b6ee-3cbb18313ddd
+# ╠═9b179f2c-8001-4f1f-ae6f-4da49da94f3c
 # ╠═bc10541e-1ac3-11eb-0b5f-916922f1a8e8
 # ╟─d39f149e-1ac3-11eb-39a2-41c2030d7d49
 # ╟─e135d490-1ac2-11eb-053e-914051f16e31
