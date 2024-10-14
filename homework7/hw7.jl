@@ -606,7 +606,9 @@ function intersection(photon::Photon, sphere::Sphere; ϵ=1e-3)
     
     t₁ = (-b + sqrt(discriminant)) / (2*a)
     t₂ = (-b - sqrt(discriminant)) / (2*a) 
-    
+    # if both t1 and t2 are positive pick the smallest of two
+	# if one is negative pick the other
+	# if both are negative return Miss
     t = t₁ > ϵ ? (t₂ > ϵ ? min(t₁, t₂) : t₁) : t₂ > ϵ ? t₂ : -1
     
     if t < ϵ
@@ -614,8 +616,8 @@ function intersection(photon::Photon, sphere::Sphere; ϵ=1e-3)
     end
     
     intersection_pt = photon.p .+ t .* photon.l
-    D = sqrt(sum((x->x^2).(photon.p .- intersection_pt)))
-    
+    D = sqrt(sum((x->x^2).(photon.p .- intersection_pt))) # Distance between photon and point of intersection
+     
     return Intersection(sphere, D, intersection_pt)
 end
 
