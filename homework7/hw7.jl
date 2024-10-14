@@ -387,13 +387,18 @@ Where $\ell_1$ and $\ell_2$ are the photon directions before and after the refle
 # ╔═╡ 43306bd4-194d-11eb-2e30-07eabb8b29ef
 reflect(ℓ₁::Vector, n̂::Vector)::Vector = ℓ₁ - 2 * dot(ℓ₁, n̂) * n̂
 
+# ╔═╡ 40c29711-e0a3-4fde-a48e-e61faae81d62
+let
+	p = Photon([5,0], [1,0], 1.0)
+	w = Wall([10, 0], normalize([-1, 0]))
+
+	result = reflect(p.l, w.normal)
+end
+
 # ╔═╡ 70b8401e-1c7e-11eb-16b2-d54d8f66d71a
 md"""
 👉 Verify that the function `reflect` works by writing a simple test case:
 """
-
-# ╔═╡ 79532662-1c7e-11eb-2edf-57e7cfbc1eda
-
 
 # ╔═╡ b6614d80-194b-11eb-1edb-dba3c29672f8
 md"""
@@ -1039,6 +1044,21 @@ let
 	end
 end
 
+# ╔═╡ 79532662-1c7e-11eb-2edf-57e7cfbc1eda
+let
+	p = Photon([5,0], [1,0], 1.0)
+	w = Wall([10, 0], normalize([-1, 0]))
+	
+	result = reflect(p.l, w.normal)
+	
+	if result isa Vector && result == [-1, 0]
+		correct()
+	else
+		keep_working()
+	end
+	
+end
+
 # ╔═╡ ec7638e0-19c3-11eb-1ca1-0b3aa3b40240
 not_defined(variable_name) = Markdown.MD(Markdown.Admonition("danger", "Oopsie!", [md"Make sure that you define a variable called **$(Markdown.Code(string(variable_name)))**"]))
 
@@ -1116,6 +1136,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─522e6b22-194d-11eb-167c-052e65f6b703
 # ╟─dad5acfa-194c-11eb-27f9-01f40342a681
 # ╠═43306bd4-194d-11eb-2e30-07eabb8b29ef
+# ╠═40c29711-e0a3-4fde-a48e-e61faae81d62
 # ╟─70b8401e-1c7e-11eb-16b2-d54d8f66d71a
 # ╠═79532662-1c7e-11eb-2edf-57e7cfbc1eda
 # ╟─b6614d80-194b-11eb-1edb-dba3c29672f8
