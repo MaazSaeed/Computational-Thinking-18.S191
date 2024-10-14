@@ -360,6 +360,9 @@ By taking the minimum, we have found our closest hit! Let's turn this into a fun
 👉 Write a function `closest_hit` that takes a `photon` and a vector of objects. Calculate the vector of `Intersection`s/`Miss`es, and return the `minimum`.
 """
 
+# ╔═╡ c26f5b99-bb8c-4697-ac55-8bd198ad33a5
+
+
 # ╔═╡ e9c6a0b8-1ad0-11eb-1606-0319caf0948a
 md"""
  $(html"<br><br><br><br>")
@@ -592,9 +595,35 @@ With all this said, we are ready to write some code.
 
 # ╔═╡ 392fe192-1ca1-11eb-36c4-f9bd2b01a5e5
 function intersection(photon::Photon, sphere::Sphere; ϵ=1e-3)
-	
-	return missing
+    a = dot(photon.l, photon.l)
+    b = dot(2 .* photon.l, photon.p .- sphere.center)
+    c = dot(photon.p .- sphere.center, photon.p .- sphere.center) - sphere.radius^2
+    discriminant = b^2 - 4*a*c
+    
+    # No intersection if discriminant is negative
+    if discriminant < 0
+        return Miss()
+    end
+    
+    # Compute both possible intersection distances
+    t₁ = (-b + sqrt(discriminant)) / (2*a)
+    t₂ = (-b - sqrt(discriminant)) / (2*a) 
+    
+    # Select the smallest positive t
+    t = t₁ > ϵ ? (t₂ > ϵ ? min(t₁, t₂) : t₁) : t₂ > ϵ ? t₂ : -1
+    
+    # No valid intersection if t is negative
+    if t < ϵ
+        return Miss()
+    end
+    
+    # Compute the intersection point
+    intersection_pt = photon.p .+ t .* photon.l
+    D = sqrt(sum((x->x^2).(photon.p .- intersection_pt)))
+    
+    return Intersection(sphere, D, intersection_pt)
 end
+
 
 # ╔═╡ a306e880-19eb-11eb-0ff1-d7ef49777f63
 test_intersection = intersection(dizzy, test_wall)
@@ -664,15 +693,29 @@ function interact(photon::Photon, hit::Intersection{Wall})
 	return Photon(intersection_point.point, dir, photon.ior)
 end
 
+# ╔═╡ c8f2ef4c-7b2c-4e80-9a22-07491b756948
+function vec2_from_angle(θ)
+	x = cos(θ)
+	y = sin(θ)
+
+	return normalize([x, y])
+end
+
+# ╔═╡ e4cdbf96-b3e1-47e6-ae81-625aea052e2e
+@bind theta Slider(-2π:0.01:2π, show_value=true)
+
+# ╔═╡ 6afc445a-e49f-4faf-9f70-8f0a80bc53e8
+philip2 = Photon([-5, 8], vec2_from_angle(theta), 1.0)
+
 # ╔═╡ af5c6bea-1c9c-11eb-35ae-250337e4fc86
 test_sphere = Sphere(
-	[7, -6],
-	2,
+	[5, -4],
+	4,
 	1.5,
 )
 
 # ╔═╡ 251f0262-1a0c-11eb-39a3-09be67091dc8
-sphere_intersection = intersection(philip, test_sphere)
+sphere_intersection = intersection(philip2, test_sphere)
 
 # ╔═╡ b3ab93d2-1a0b-11eb-0f5a-cdca19af3d89
 ex_3_scene = [test_sphere, box_scene...]
@@ -681,7 +724,7 @@ ex_3_scene = [test_sphere, box_scene...]
 let
 	p = plot_scene(ex_3_scene)
 	
-	plot_photon_arrow!(p, philip, 4; label="Philip")
+	plot_photon_arrow!(p, philip2, 4; label="Philip")
 	if sphere_intersection isa Intersection
 		scatter!(p, sphere_intersection.point[1:1], sphere_intersection.point[2:2], label="Intersection point")
 	end
@@ -1143,6 +1186,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╠═63ef21c6-1c7a-11eb-2f3c-c5ac16bc289f
 # ╟─6cf7df1a-1c7a-11eb-230b-df1333f191c7
 # ╠═19cf420e-1c7c-11eb-1cb8-dd939fee1276
+# ╠═c26f5b99-bb8c-4697-ac55-8bd198ad33a5
 # ╠═b8cd4112-1c7c-11eb-3b2d-29170ad9beb5
 # ╠═a99c40bc-1c7c-11eb-036b-7fe6e9b937e5
 # ╟─e9c6a0b8-1ad0-11eb-1606-0319caf0948a
@@ -1174,8 +1218,11 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─337918f4-194f-11eb-0b45-b13fef3b23bf
 # ╟─492b257a-194f-11eb-17fb-f770b4d3da2e
 # ╠═392fe192-1ca1-11eb-36c4-f9bd2b01a5e5
+# ╠═c8f2ef4c-7b2c-4e80-9a22-07491b756948
+# ╠═e4cdbf96-b3e1-47e6-ae81-625aea052e2e
+# ╠═6afc445a-e49f-4faf-9f70-8f0a80bc53e8
 # ╠═251f0262-1a0c-11eb-39a3-09be67091dc8
-# ╟─83aa9cea-1a0c-11eb-281d-699665da2b4f
+# ╠═83aa9cea-1a0c-11eb-281d-699665da2b4f
 # ╠═af5c6bea-1c9c-11eb-35ae-250337e4fc86
 # ╠═b3ab93d2-1a0b-11eb-0f5a-cdca19af3d89
 # ╟─71dc652e-1c9c-11eb-396c-cfd9ee2261fe
