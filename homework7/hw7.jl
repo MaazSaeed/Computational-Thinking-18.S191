@@ -821,6 +821,8 @@ end
 
 # ╔═╡ 1a43b70c-1ca3-11eb-12a5-a94ebbba0e86
 function trace(photon::Photon, scene::Vector{<:Object}, N)
+	[photon=step_ray(photon, scene) for i=1:N]
+	#=
 	photons = []
 	for i=1:N
 		next_photon = step_ray(photon, scene)
@@ -828,6 +830,7 @@ function trace(photon::Photon, scene::Vector{<:Object}, N)
 		photon = next_photon
 	end
 	return photons
+	=#
 end
 
 # ╔═╡ 1ee0787e-1a08-11eb-233b-43a654f70117
@@ -838,7 +841,7 @@ let
 	
 	
 	line = [philip.p, [r.p for r in path]...]
-	plot!(p, first.(line), last.(line), lw=5, color=:pink)
+	plot!(p, first.(line), last.(line), lw=5, color=:orange)
 	
 	plot_photon_arrow!(p, philip)
 	plot_photon_arrow!.([p], path)
@@ -1159,8 +1162,8 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─a45e1012-194d-11eb-3252-bb89daed3c8d
 # ╟─7ba5dda0-1ad1-11eb-1c4e-2391c11f54b3
 # ╠═1a43b70c-1ca3-11eb-12a5-a94ebbba0e86
-# ╟─3cd36ac0-1a09-11eb-1818-75b36e67594a
-# ╟─1ee0787e-1a08-11eb-233b-43a654f70117
+# ╠═3cd36ac0-1a09-11eb-1818-75b36e67594a
+# ╠═1ee0787e-1a08-11eb-233b-43a654f70117
 # ╟─7478330a-1c81-11eb-2f9f-099f1111032c
 # ╟─ba0a869a-1ad1-11eb-091f-916e9151f052
 # ╠═3aa539ce-193f-11eb-2a0f-bbc6b83528b7
