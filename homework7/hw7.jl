@@ -268,7 +268,9 @@ where $p$ is the position, $\hat \ell$ is the direction of the light, and $\hat 
 
 # ╔═╡ abe3de54-1ca0-11eb-01cd-11fe798bfb97
 function intersection_distance(photon::Photon, wall::Wall)
-	-dot((photon.p .- wall.position), wall.normal) / dot(photon.l, wall.normal)
+	Pᵣ, Pₗ = photon.p, photon.l # Position, direction of the photon
+	Pₒ, n̂ = wall.position, wall.normal # obstacle position, and normal at the position
+	D = -dot((Pᵣ .- Pₒ), n̂) / dot(Pₗ, n̂) # Expression oriented
 end
 
 # ╔═╡ 42d65f56-1aca-11eb-1079-e32f85554349
@@ -287,12 +289,6 @@ If $D$ is _negative_ (or zero), then the wall is _behind_ the photon - we should
 ##### Floating points
 We are using _floating points_ (`Float64`) to store positions, distances, etc., which means that we need to account for small errors. Like in the lecture, we will not check for `D > 0`, but `D > ϵ` with `ϵ = 1e-3`.
 """
-
-# ╔═╡ a5847264-1ca0-11eb-0b45-eb5388f6e688
-function intersection(photon::Photon, wall::Wall; ϵ=1e-3)
-	
-	return missing
-end
 
 # ╔═╡ 7f286ccc-1c75-11eb-1270-95a87840b300
 @bind dizzy_angle Slider(0:0.0001:2π, default=2.2)
@@ -337,6 +333,12 @@ begin
 	Base.isless(a::Miss, b::Intersection) = false
 	Base.isless(a::Intersection, b::Miss) = true
 	Base.isless(a::Intersection, b::Intersection) = a.distance < b.distance
+end
+
+# ╔═╡ a5847264-1ca0-11eb-0b45-eb5388f6e688
+function intersection(photon::Photon, wall::Wall; ϵ=1e-3)
+	D = intersection_distance(photon, wall)
+	return D > ϵ ? Intersection(wall, D, photon.p .+ photon.l .* D) : Miss()
 end
 
 # ╔═╡ 052dc502-1c7a-11eb-2316-d3a1eef2af94
@@ -1091,7 +1093,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─038d5e88-1ac7-11eb-2020-a9d7e19feebc
 # ╟─6544be90-19d3-11eb-153c-218025f738c6
 # ╠═a306e880-19eb-11eb-0ff1-d7ef49777f63
-# ╟─3663bf80-1a06-11eb-3596-8fbbed28cc38
+# ╠═3663bf80-1a06-11eb-3596-8fbbed28cc38
 # ╟─7f286ccc-1c75-11eb-1270-95a87840b300
 # ╟─d70380a4-1ad0-11eb-1184-f7e9b84a83ad
 # ╠═55187168-1c78-11eb-1182-ab4336b577a4
