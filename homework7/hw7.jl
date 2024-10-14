@@ -426,12 +426,6 @@ md"""
 👉 Write a function `trace` that takes an initial `Photon`, a vector of `Object`s and `N`, the number of steps to make. Return a vector of `Photon`s. Try to use `accumulate`.
 """
 
-# ╔═╡ 1a43b70c-1ca3-11eb-12a5-a94ebbba0e86
-function trace(photon::Photon, scene::Vector{<:Object}, N)
-	
-	return missing
-end
-
 # ╔═╡ 3cd36ac0-1a09-11eb-1818-75b36e67594a
 @bind mirror_test_ray_N Slider(1:30; default=4)
 
@@ -516,22 +510,6 @@ let
 	p = plot_scene(ex_1_scene, legend=false, size=(400,200))
 	plot_photon_arrow!(p, philip, 5)
 end
-
-# ╔═╡ 1ee0787e-1a08-11eb-233b-43a654f70117
-let
-	p = plot_scene(ex_1_scene, legend=false, xlim=(-11,11), ylim=(-11,11))
-	
-	path = trace(philip, ex_1_scene, mirror_test_ray_N)
-	
-	
-	line = [philip.p, [r.p for r in path]...]
-	plot!(p, first.(line), last.(line), lw=5, color=:pink)
-	
-	plot_photon_arrow!(p, philip)
-	plot_photon_arrow!.([p], path)
-	
-	p
-end |> as_svg
 
 # ╔═╡ e5c0e960-19cc-11eb-107d-39b397a783ab
 example_sphere = Sphere(
@@ -840,6 +818,33 @@ function step_ray(photon::Photon, objects::Vector{<:Object})
 	
 	interact(photon, hit)
 end
+
+# ╔═╡ 1a43b70c-1ca3-11eb-12a5-a94ebbba0e86
+function trace(photon::Photon, scene::Vector{<:Object}, N)
+	photons = []
+	for i=1:N
+		next_photon = step_ray(photon, scene)
+		push!(photons, next_photon)
+		photon = next_photon
+	end
+	return photons
+end
+
+# ╔═╡ 1ee0787e-1a08-11eb-233b-43a654f70117
+let
+	p = plot_scene(ex_1_scene, legend=false, xlim=(-11,11), ylim=(-11,11))
+	
+	path = trace(philip, ex_1_scene, mirror_test_ray_N)
+	
+	
+	line = [philip.p, [r.p for r in path]...]
+	plot!(p, first.(line), last.(line), lw=5, color=:pink)
+	
+	plot_photon_arrow!(p, philip)
+	plot_photon_arrow!.([p], path)
+	
+	p
+end |> as_svg
 
 # ╔═╡ dced1fd0-1c9e-11eb-3226-17dc1e09e018
 md"""
