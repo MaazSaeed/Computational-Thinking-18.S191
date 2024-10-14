@@ -600,24 +600,19 @@ function intersection(photon::Photon, sphere::Sphere; ϵ=1e-3)
     c = dot(photon.p .- sphere.center, photon.p .- sphere.center) - sphere.radius^2
     discriminant = b^2 - 4*a*c
     
-    # No intersection if discriminant is negative
     if discriminant < 0
         return Miss()
     end
     
-    # Compute both possible intersection distances
     t₁ = (-b + sqrt(discriminant)) / (2*a)
     t₂ = (-b - sqrt(discriminant)) / (2*a) 
     
-    # Select the smallest positive t
     t = t₁ > ϵ ? (t₂ > ϵ ? min(t₁, t₂) : t₁) : t₂ > ϵ ? t₂ : -1
     
-    # No valid intersection if t is negative
     if t < ϵ
         return Miss()
     end
     
-    # Compute the intersection point
     intersection_pt = photon.p .+ t .* photon.l
     D = sqrt(sum((x->x^2).(photon.p .- intersection_pt)))
     
