@@ -809,7 +809,7 @@ function refract(
 	
 	c = -dot(ℓ₁, n̂_oriented)
 	
-	normalize(r * ℓ₁ + (r*c - sqrt(1 - r^2 * (1 - c^2))) * n̂_oriented)
+	normalize(r * ℓ₁ + (r*c - sqrt(abs(1 - r^2 * (1 - c^2)))) * n̂_oriented)
 end
 
 # ╔═╡ 71b70da6-193e-11eb-0bc4-f309d24fd4ef
@@ -837,7 +837,7 @@ md"""
 function interact(photon::Photon, hit::Intersection{Sphere})
 	intersection_point = intersection(photon, hit.object)
 	new_ior = if photon.ior == 1.0 
-		1.33
+		2.0
 	else
 		1.0
 	end
@@ -901,15 +901,18 @@ md"""
 To test your code, modify the definition of `test_lens_photon` and `test_lens` below.
 """
 
-# ╔═╡ 65aec4fc-1c9e-11eb-1c5a-6dd7c533d3b8
-test_lens_photon = Photon([0,-5], [1,1], 1.0)
-
 # ╔═╡ 5895d9ae-1c9e-11eb-2f4e-671f2a7a0150
 test_lens = Sphere(
 	[5, -1.5],
 	3,
 	1.5,
 	)
+
+# ╔═╡ 9eb914fc-7bc4-4c5e-bb44-3e0f8f00eaa8
+@bind theta_2 Slider(-2π:0.01:2π, show_value=true)
+
+# ╔═╡ 65aec4fc-1c9e-11eb-1c5a-6dd7c533d3b8
+test_lens_photon = Photon([0,-5], normalize(vec2_from_angle(theta_2)), 1.0)
 
 # ╔═╡ 83acf10e-1c9e-11eb-3426-bb28e7bc6c79
 let
@@ -946,7 +949,7 @@ let
 	end
 	
 	line = [test_lens_photon.p, [r.p for r in path]...]
-	plot!(p, first.(line), last.(line), lw=2, color=:pink)
+	plot!(p, first.(line), last.(line), lw=2, color=:purple)
 	
 	p
 end |> as_svg
@@ -1243,6 +1246,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╠═65aec4fc-1c9e-11eb-1c5a-6dd7c533d3b8
 # ╠═5895d9ae-1c9e-11eb-2f4e-671f2a7a0150
 # ╠═83acf10e-1c9e-11eb-3426-bb28e7bc6c79
+# ╠═9eb914fc-7bc4-4c5e-bb44-3e0f8f00eaa8
 # ╟─13fef49c-1c9e-11eb-2aa3-d3aa2bfd0d57
 # ╟─c492a1f8-1a0c-11eb-2c38-5921c39cf5f8
 # ╠═b65d9a0c-1a0c-11eb-3cd5-e5a2c4302c7e
