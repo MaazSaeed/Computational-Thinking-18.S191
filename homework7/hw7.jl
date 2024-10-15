@@ -836,7 +836,7 @@ md"""
 # ╔═╡ 427747d6-1ca1-11eb-28ae-ff50728c84fe
 function interact(photon::Photon, hit::Intersection{Sphere})
 	intersection_point = intersection(photon, hit.object)
-	new_ior = photon.ior == 1.0 ? 1.33 : 1.0
+	new_ior = photon.ior == 1.0 ? hit.object.ior : 1.0
 	
 	l = refract(photon.l, sphere_normal_at(intersection_point.point, hit.object), photon.ior, new_ior)
 	return Photon(intersection_point.point, l, new_ior)
@@ -858,7 +858,7 @@ end
 # ╔═╡ 76ef6e46-1a06-11eb-03e3-9f40a86dc9aa
 function step_ray(photon::Photon, objects::Vector{<:Object})
 	hit = closest_hit(photon, objects)
-	
+
 	interact(photon, hit)
 end
 
@@ -961,7 +961,60 @@ md"""
 👉 Recreate the spherical aberration figure from [the lecture](https://www.youtube.com/watch?v=MkkZb5V6HqM) (around the end of the video), and make the index of refraction interactive using a `Slider`. _Or make something else!_
 """
 
+# ╔═╡ 70de44da-b93d-456c-a86c-90b6c38cf70f
+@bind right_mirror Slider(15:0.01:50, show_value=true)
+
+# ╔═╡ f640945d-9093-4fed-b626-1b568249bc5d
+@bind top_mirror Slider(20:0.01:40, show_value=true)
+
+# ╔═╡ acf8a6f1-d7bd-4775-90b2-af07349ebaec
+@bind path_len Slider(1:6; default=4)
+
+# ╔═╡ 0719555a-842a-47f6-b9b1-2b38633ebe20
+
+
+# ╔═╡ 9654d877-1f02-4513-85cf-6ae7b5dc3ffe
+@bind ior_lens Slider(1.0:0.01:2.5, show_value=true)
+
 # ╔═╡ 270762e4-1ca4-11eb-2fb4-392e5c3b3e04
+begin
+	mirrors = [
+	Wall(
+		[right_mirror,0],
+		[-1,0]
+		),
+	Wall(
+		[0, top_mirror],
+	    [0, -1]),
+	Wall(
+		[0, -top_mirror],
+	    [0, 1]),
+	Wall(
+		[-right_mirror, 0],
+	    [1, 0]),
+	]
+
+	sphere_lens = Sphere([0, 0], 22, ior_lens)
+
+	scene_abberation = [sphere_lens, mirrors...]
+	p = plot_scene(scene_abberation, legend=false, xlim=(-60, 60), ylim=(-40 , 40))
+
+	photons = [Photon([-50, -2i], [1, 0], 1.0) for i=-10:10]
+	for photon in photons
+		path = accumulate(1:path_len; init=photon) do old_photon, i
+			step_ray(old_photon, scene_abberation)
+		end
+	
+		line = [photon.p, [r.p for r in path]...]
+		plot!(p, first.(line), last.(line), lw=1, color=:black)
+	end
+	p
+end
+
+# ╔═╡ 4d09c5aa-88b7-4ed3-8c85-1d8382d9e667
+
+
+# ╔═╡ 32043522-048b-4a49-a62c-500d807435ab
 
 
 # ╔═╡ bbf730c8-1ca6-11eb-3bb0-1188046339ac
@@ -1244,11 +1297,18 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╠═83acf10e-1c9e-11eb-3426-bb28e7bc6c79
 # ╠═9eb914fc-7bc4-4c5e-bb44-3e0f8f00eaa8
 # ╟─13fef49c-1c9e-11eb-2aa3-d3aa2bfd0d57
-# ╟─c492a1f8-1a0c-11eb-2c38-5921c39cf5f8
+# ╠═c492a1f8-1a0c-11eb-2c38-5921c39cf5f8
 # ╠═b65d9a0c-1a0c-11eb-3cd5-e5a2c4302c7e
 # ╟─c00eb0a6-cab2-11ea-3887-070ebd8d56e2
 # ╟─3dd0a48c-1ca3-11eb-1127-e7c43b5d1666
+# ╠═70de44da-b93d-456c-a86c-90b6c38cf70f
+# ╠═f640945d-9093-4fed-b626-1b568249bc5d
+# ╠═acf8a6f1-d7bd-4775-90b2-af07349ebaec
+# ╠═0719555a-842a-47f6-b9b1-2b38633ebe20
+# ╠═9654d877-1f02-4513-85cf-6ae7b5dc3ffe
 # ╠═270762e4-1ca4-11eb-2fb4-392e5c3b3e04
+# ╠═4d09c5aa-88b7-4ed3-8c85-1d8382d9e667
+# ╠═32043522-048b-4a49-a62c-500d807435ab
 # ╟─bbf730c8-1ca6-11eb-3bb0-1188046339ac
 # ╠═cbd8f164-1ca6-11eb-1440-bdaabf73a6c7
 # ╟─ebd05bf0-19c3-11eb-2559-7d0745a84025
