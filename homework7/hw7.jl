@@ -965,7 +965,10 @@ md"""
 
 
 # ╔═╡ 70de44da-b93d-456c-a86c-90b6c38cf70f
-@bind right_mirror Slider(15:0.01:50, show_value=true)
+@bind right_mirror Slider(25:0.01:60, show_value=true)
+
+# ╔═╡ 62c2bc86-a0af-4804-93ff-30a69177d2bd
+@bind left_mirror Slider(-80:0.01:-20, show_value=true, default=-60)
 
 # ╔═╡ f640945d-9093-4fed-b626-1b568249bc5d
 @bind top_mirror Slider(20:0.01:40, show_value=true)
@@ -993,7 +996,7 @@ begin
 		[0, -top_mirror],
 	    [0, 1]),
 	Wall(
-		[-right_mirror, 0],
+		[left_mirror, 0],
 	    [1, 0]),
 	]
 
@@ -1002,7 +1005,7 @@ begin
 	scene_abberation = [sphere_lens, mirrors...]
 	p = plot_scene(scene_abberation, legend=false, xlim=(-60, 60), ylim=(-40 , 40))
 
-	photons = [Photon([-50, -2i], [1, 0], 1.0) for i=-10:10]
+	photons = [Photon([left_mirror, -2i], [1, 0], 1.0) for i=-10:10]
 	for photon in photons
 		path = accumulate(1:path_len; init=photon) do old_photon, i
 			step_ray(old_photon, scene_abberation)
@@ -1306,6 +1309,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─3dd0a48c-1ca3-11eb-1127-e7c43b5d1666
 # ╠═5f3d6704-0157-4276-b8cc-9837ff0feb96
 # ╠═70de44da-b93d-456c-a86c-90b6c38cf70f
+# ╠═62c2bc86-a0af-4804-93ff-30a69177d2bd
 # ╠═f640945d-9093-4fed-b626-1b568249bc5d
 # ╠═acf8a6f1-d7bd-4775-90b2-af07349ebaec
 # ╠═0719555a-842a-47f6-b9b1-2b38633ebe20
