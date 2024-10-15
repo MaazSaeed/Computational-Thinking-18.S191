@@ -702,7 +702,7 @@ end
 @bind theta Slider(-2π:0.01:2π, show_value=true)
 
 # ╔═╡ 6afc445a-e49f-4faf-9f70-8f0a80bc53e8
-philip2 = Photon([5, -4], vec2_from_angle(theta), 1.0)
+philip2 = Photon([-5, -4], vec2_from_angle(theta), 1.0)
 
 # ╔═╡ af5c6bea-1c9c-11eb-35ae-250337e4fc86
 test_sphere = Sphere(
@@ -960,6 +960,9 @@ Now we can put it all together into an image of spherical aberration!
 md"""
 👉 Recreate the spherical aberration figure from [the lecture](https://www.youtube.com/watch?v=MkkZb5V6HqM) (around the end of the video), and make the index of refraction interactive using a `Slider`. _Or make something else!_
 """
+
+# ╔═╡ 5f3d6704-0157-4276-b8cc-9837ff0feb96
+
 
 # ╔═╡ 70de44da-b93d-456c-a86c-90b6c38cf70f
 @bind right_mirror Slider(15:0.01:50, show_value=true)
@@ -1301,6 +1304,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╠═b65d9a0c-1a0c-11eb-3cd5-e5a2c4302c7e
 # ╟─c00eb0a6-cab2-11ea-3887-070ebd8d56e2
 # ╟─3dd0a48c-1ca3-11eb-1127-e7c43b5d1666
+# ╠═5f3d6704-0157-4276-b8cc-9837ff0feb96
 # ╠═70de44da-b93d-456c-a86c-90b6c38cf70f
 # ╠═f640945d-9093-4fed-b626-1b568249bc5d
 # ╠═acf8a6f1-d7bd-4775-90b2-af07349ebaec
