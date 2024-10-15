@@ -836,13 +836,9 @@ md"""
 # ╔═╡ 427747d6-1ca1-11eb-28ae-ff50728c84fe
 function interact(photon::Photon, hit::Intersection{Sphere})
 	intersection_point = intersection(photon, hit.object)
-	new_ior = if photon.ior == 1.0 
-		2.0
-	else
-		1.0
-	end
+	new_ior = photon.ior == 1.0 ? 1.33 : 1.0
 	
-	l = refract(photon.l, sphere_normal_at(photon.p, hit.object), photon.ior, new_ior)
+	l = refract(photon.l, sphere_normal_at(intersection_point.point, hit.object), photon.ior, new_ior)
 	return Photon(intersection_point.point, l, new_ior)
 end
 
@@ -909,10 +905,10 @@ test_lens = Sphere(
 	)
 
 # ╔═╡ 9eb914fc-7bc4-4c5e-bb44-3e0f8f00eaa8
-@bind theta_2 Slider(-2π:0.01:2π, show_value=true)
+@bind theta_2 Slider(-2π:0.01:2π, show_value=true, default=0.0)
 
 # ╔═╡ 65aec4fc-1c9e-11eb-1c5a-6dd7c533d3b8
-test_lens_photon = Photon([0,-5], normalize(vec2_from_angle(theta_2)), 1.0)
+test_lens_photon = Photon([0, -1.5], normalize(vec2_from_angle(theta_2)), 1.0)
 
 # ╔═╡ 83acf10e-1c9e-11eb-3426-bb28e7bc6c79
 let
