@@ -702,7 +702,7 @@ end
 @bind theta Slider(-2π:0.01:2π, show_value=true)
 
 # ╔═╡ 6afc445a-e49f-4faf-9f70-8f0a80bc53e8
-philip2 = Photon([-5, 8], vec2_from_angle(theta), 1.0)
+philip2 = Photon([5, -4], vec2_from_angle(theta), 1.0)
 
 # ╔═╡ af5c6bea-1c9c-11eb-35ae-250337e4fc86
 test_sphere = Sphere(
@@ -835,8 +835,15 @@ md"""
 
 # ╔═╡ 427747d6-1ca1-11eb-28ae-ff50728c84fe
 function interact(photon::Photon, hit::Intersection{Sphere})
+	intersection_point = intersection(photon, hit.object)
+	new_ior = if photon.ior == 1.0 
+		1.33
+	else
+		1.0
+	end
 	
-	return missing
+	l = refract(photon.l, sphere_normal_at(photon.p, hit.object), photon.ior, new_ior)
+	return Photon(intersection_point.point, l, new_ior)
 end
 
 # ╔═╡ 0b03316c-1c80-11eb-347c-1b5c9a0ae379
@@ -895,7 +902,7 @@ To test your code, modify the definition of `test_lens_photon` and `test_lens` b
 """
 
 # ╔═╡ 65aec4fc-1c9e-11eb-1c5a-6dd7c533d3b8
-test_lens_photon = Photon([0,0], [1,0], 1.0)
+test_lens_photon = Photon([0,-5], [1,1], 1.0)
 
 # ╔═╡ 5895d9ae-1c9e-11eb-2f4e-671f2a7a0150
 test_lens = Sphere(
@@ -916,7 +923,7 @@ let
 	end
 	
 	line = [test_lens_photon.p, [r.p for r in path]...]
-	plot!(p, first.(line), last.(line), lw=5, color=:red)
+	plot!(p, first.(line), last.(line), lw=2, color=:red)
 	
 	p
 end |> as_svg
@@ -939,7 +946,7 @@ let
 	end
 	
 	line = [test_lens_photon.p, [r.p for r in path]...]
-	plot!(p, first.(line), last.(line), lw=5, color=:red)
+	plot!(p, first.(line), last.(line), lw=2, color=:pink)
 	
 	p
 end |> as_svg
@@ -1226,7 +1233,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─584ce620-1935-11eb-177a-f75d9ad8a399
 # ╟─78915326-1937-11eb-014f-fff29b3660a0
 # ╠═14dc73d2-1a0d-11eb-1a3c-0f793e74da9b
-# ╠═71b70da6-193e-11eb-0bc4-f309d24fd4ef
+# ╟─71b70da6-193e-11eb-0bc4-f309d24fd4ef
 # ╟─54b81de0-193f-11eb-004d-f90ec43588f8
 # ╠═6fdf613c-193f-11eb-0029-957541d2ed4d
 # ╟─392c25b8-1add-11eb-225d-49cfca27bef4
@@ -1235,10 +1242,10 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─dced1fd0-1c9e-11eb-3226-17dc1e09e018
 # ╠═65aec4fc-1c9e-11eb-1c5a-6dd7c533d3b8
 # ╠═5895d9ae-1c9e-11eb-2f4e-671f2a7a0150
-# ╟─83acf10e-1c9e-11eb-3426-bb28e7bc6c79
+# ╠═83acf10e-1c9e-11eb-3426-bb28e7bc6c79
 # ╟─13fef49c-1c9e-11eb-2aa3-d3aa2bfd0d57
 # ╟─c492a1f8-1a0c-11eb-2c38-5921c39cf5f8
-# ╟─b65d9a0c-1a0c-11eb-3cd5-e5a2c4302c7e
+# ╠═b65d9a0c-1a0c-11eb-3cd5-e5a2c4302c7e
 # ╟─c00eb0a6-cab2-11ea-3887-070ebd8d56e2
 # ╟─3dd0a48c-1ca3-11eb-1127-e7c43b5d1666
 # ╠═270762e4-1ca4-11eb-2fb4-392e5c3b3e04
