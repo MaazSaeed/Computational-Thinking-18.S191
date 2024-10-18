@@ -468,24 +468,27 @@ function step_ray(ray::Photon, objects::Vector{O}, num_intersections) where {O <
     else
         hit = closest_hit(ray, objects)
 
-        if hit isa Miss || hit isa SkyBox
+        if hit isa Miss 
             return ray
         end
-		#=
+		if hit isa SkyBox
+			return interact(ray, hit)
+		end
+		
         if hit isa Sphere
             int_pt = intersection(ray, hit)  
             r_n = reflect(ray.l, sphere_normal_at(int_pt.point, hit))  
             r_ray = Photon(int_pt.point, r_n, ray.c, ray.ior) 
             return step_ray(r_ray, objects, num_intersections - 1)
         end
-		=#
+		#=
 		if hit isa Sphere
             int_pt = intersection(ray, hit)  
             refr_n = reflect(ray.l, sphere_normal_at(int_pt.point, hit))  
             refr_ray = Photon(int_pt.point, refr_n, ray.c, ray.ior) 
             return step_ray(refr_ray, objects, num_intersections - 1)
         end
-
+		=#
         return interact(ray, hit, num_intersections, objects)
     end
 end
