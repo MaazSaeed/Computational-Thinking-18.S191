@@ -1012,7 +1012,7 @@ begin
 		end
 	
 		line = [photon.p, [r.p for r in path]...]
-		plot!(p, first.(line), last.(line), lw=1, color=:black)
+		plot!(p, first.(line), last.(line), lw=1, color=:red)
 	end
 	p
 end

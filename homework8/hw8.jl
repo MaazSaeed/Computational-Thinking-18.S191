@@ -475,18 +475,21 @@ function step_ray(ray::Photon, objects::Vector{O}, num_intersections) where {O <
 			return interact(ray, hit)
 		end
 		
+		reflected_ray = missing
+		refracted_ray = missing
+		
         if hit isa Sphere
-            int_pt = intersection(ray, hit)  
-            r_n = reflect(ray.l, sphere_normal_at(int_pt.point, hit))  
+			int_pt = intersection(ray, hit.object) 
+			sphere_normal = sphere_normal_at(int_pt.point, hit.object)
+            r_n = refract(ray.l, sphere_normal, ray.ior, hit.object.ior)  
             r_ray = Photon(int_pt.point, r_n, ray.c, ray.ior) 
             return step_ray(r_ray, objects, num_intersections - 1)
         end
 		#=
 		if hit isa Sphere
-            int_pt = intersection(ray, hit)  
-            refr_n = reflect(ray.l, sphere_normal_at(int_pt.point, hit))  
+            refr_n = refract(ray.l, sphere_normal,)  
             refr_ray = Photon(int_pt.point, refr_n, ray.c, ray.ior) 
-            return step_ray(refr_ray, objects, num_intersections - 1)
+            refracted_ray = step_ray(refr_ray, objects, num_intersections - 1)
         end
 		=#
         return interact(ray, hit, num_intersections, objects)
@@ -510,9 +513,9 @@ let
 	ray_trace(scene, basic_camera; num_intersections=4)
 end
 
-# ╔═╡ 0600cc39-7126-4ba9-a9c0-42979707e2b7
+# ╔═╡ 7f788a7a-1293-410b-b52c-44789c8b539c
 function interact(photon::Photon, hit::Intersection{Sphere}, num_intersections, objects::Vector{Object})
-    reflection_dir = reflect(photon.l, sphere_normal_at(hit.point, hit.object))
+    reflection_dir = refract(photon.l, sphere_normal_at(hit.point, hit.object), photon.ior, hit.object.s.ior)
     reflected_photon = Photon(hit.point, reflection_dir, photon.c, photon.ior)
     return step_ray(reflected_photon, objects, num_intersections - 1)
 end
@@ -548,9 +551,9 @@ main_scene = [
 
 # ╔═╡ 1f66ba6e-1ef8-11eb-10ba-4594f7c5ff19
 let
-	cam = Camera((600,360), 16, -15, [0,10,100])
+	cam = Camera((800,600), 16, -15, [0,10,100])
 
-	ray_trace(main_scene, cam; num_intersections=50)
+	ray_trace(main_scene, cam; num_intersections=1000)
 end
 
 # ╔═╡ 67c0bd70-206a-11eb-3935-83d32c67f2eb
@@ -588,7 +591,7 @@ md"""
 # ╔═╡ 6f1dbf48-206d-11eb-24d3-5154703e1753
 let
 	scene = [sky, escher_sphere]
-	ray_trace(scene, escher_cam; num_intersections=3)
+	ray_trace(scene, escher_cam; num_intersections=5)
 end
 
 # ╔═╡ dc786ccc-206e-11eb-29e2-99882e6613af
@@ -1022,7 +1025,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─04a86366-208b-11eb-1977-ff7e4ae6b714
 # ╠═a9754410-204d-11eb-123e-e5c5f87ae1c5
 # ╠═086e1956-204e-11eb-2524-f719504fb95b
-# ╠═0600cc39-7126-4ba9-a9c0-42979707e2b7
+# ╠═7f788a7a-1293-410b-b52c-44789c8b539c
 # ╠═95ca879a-204d-11eb-3473-959811aa8320
 # ╠═1f66ba6e-1ef8-11eb-10ba-4594f7c5ff19
 # ╟─d1970a34-1ef7-11eb-3e1f-0fd3b8e9657f
