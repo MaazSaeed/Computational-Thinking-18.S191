@@ -448,6 +448,18 @@ To create this image, we used the ray tracing function bewlow, which takes in a 
 3. Converts everything into an image
 """
 
+# ╔═╡ 96f51f86-264e-4a4f-a9e1-40c9b444c043
+# ╠═╡ disabled = true
+#=╠═╡
+function ray_trace(objects::Vector{O}, cam::Camera;
+				   num_intersections = 10) where {O <: Object}
+	rays = init_rays(cam)
+	new_rays = step_ray.(rays, [objects], [num_intersections])
+	
+	extract_colors(new_rays)
+end
+  ╠═╡ =#
+
 # ╔═╡ 04a86366-208b-11eb-1977-ff7e4ae6b714
 md"""
 ## Writing a ray tracer
@@ -506,15 +518,22 @@ end
 begin
 	
 function interact_r(photon::Photon, hit::Intersection{Sphere}, num_intersections::Int64, objects::Vector{Object})
+	if hit.object.s.r < 0.01
+		return photon
+	end
     reflection_dir = reflect(photon.l, sphere_normal_at(hit.point, hit.object))
     reflected_photon = Photon(hit.point, reflection_dir, photon.c, photon.ior)
     return step_ray(reflected_photon, objects, num_intersections - 1)
 end
 	
 function interact(photon::Photon, hit::Intersection{Sphere}, num_intersections::Int64, objects::Vector{Object})
-    reflection_dir = refract(photon.l, sphere_normal_at(hit.point, hit.object), photon.ior, hit.object.s.ior)
-    reflected_photon = Photon(hit.point, reflection_dir, photon.c, photon.ior)
-    return step_ray(reflected_photon, objects, num_intersections - 1)
+	if hit.object.s.t < 0.01
+		return photon
+	end
+	
+    refraction_dir = refract(photon.l, sphere_normal_at(hit.point, hit.object), photon.ior, hit.object.s.ior)
+    refraction_photon = Photon(hit.point, refraction_dir, photon.c, photon.ior)
+    return step_ray(refraction_photon, objects, num_intersections - 1)
 end
 	
 interact(photon::Photon, ::Miss, ::Any, ::Any) = photon
@@ -525,7 +544,7 @@ function interact(ray::Photon, hit::Intersection{SkyBox})
 end
 	
 function step_ray(ray::Photon, objects::Vector{O}, num_intersections) where {O <: Object}
-    if num_intersections == 0
+    if num_intersections <= 0
         return ray
     else
         hit = closest_hit(ray, objects)
@@ -584,7 +603,7 @@ While working on your code, work in small increments, and do frequent checks to 
 main_scene = [
 	sky,
 	Sphere([0,0,-25], 20, 
-		Surface(1.0, 0.0, RGBA(1,1,1,0.0), 1.5)),
+		Surface(0.3, 0.7, RGBA(1,1,1,0.0), 1.5)),
 	
 	Sphere([0,50,-100], 20, 
 		Surface(0.7, 0.3, RGBA(0,1,0,0.0), 1.0)),
@@ -593,18 +612,24 @@ main_scene = [
 		Surface(0.4, 0.32, RGBA(0, .3, .8, 1), 1.13)),
 	
 	Sphere([30, 25, -60], 20,
-		Surface(0.0, 0.75, RGBA(1,0,0,0.25), 1.5)),
+		Surface(0.25, 0.75, RGBA(1,0.2,0.33,0.15), 1.5)),
 	
 	Sphere([50, 0, -25], 20,
-		Surface(0.5, 0.5, RGBA(.1,.9,.1,0.5), 1.5)),
+		Surface(0.7, 0.3, RGBA(.1,.9,.1,0.8), 1.5)),
 	
 	Sphere([-30, 25, -60], 20,
-		Surface(0.5, 0.3, RGBA(1,1,1,0), 1.5)),
+		Surface(0.1, 0.8, RGBA(1,1,1,0), 1.5)),
+	
+	Sphere([-90, 25, -60], 20,
+		Surface(0.1, 0.8, RGBA(1,1,1,0), 1.5)),
+	
+	Sphere([120, 25, -60], 20,
+		Surface(0.1, 0.8, RGBA(1,1,1,0), 1.5)),
 ]
 
 # ╔═╡ 1f66ba6e-1ef8-11eb-10ba-4594f7c5ff19
 @time let
-	cam = Camera((1920,1080), 16, -15, [0,10,100])
+	cam = Camera((960, 540), 16, -15, [0,60,260])
 
 	ray_trace(main_scene, cam; num_intersections=10)
 end
@@ -692,16 +717,6 @@ Great! It's like the Earth, but distorted. Notice that the continents are mirror
 Okay, self portrait time! Let's take a picture using your webcam, and we will use it as the skybox texture:
 """
 
-# ╔═╡ 06ac2efc-206f-11eb-1a73-9306bf5f7a9c
-# ╠═╡ disabled = true
-#=╠═╡
-let
-	face_skybox = image_skybox(face)
-	scene = [face_skybox, escher_sphere]
-	ray_trace(scene, escher_cam; num_intersections=3)
-end
-  ╠═╡ =#
-
 # ╔═╡ 48166866-2070-11eb-2722-556a6719c2a2
 md"""
 👀 wow! It's _Planet $(student.name)_, surrounded by even more $(student.name). 
@@ -723,23 +738,6 @@ end
 md"""
 Let's put it all together!
 """
-
-# ╔═╡ c68dbe1c-2066-11eb-048d-038df2c68a8b
-# ╠═╡ disabled = true
-#=╠═╡
-let
-	img = process_raw_camera_data(escher_face_data)
-	img_padded = padded(img)
-	
-	scene = [
-		image_skybox(padded(img)),
-
-		escher_sphere,
-	]
-	
-	ray_trace(scene, escher_cam; num_intersections=20)
-end
-  ╠═╡ =#
 
 # ╔═╡ ebd05bf0-19c3-11eb-2559-7d0745a84025
 if student.name == "Jazzy Doe" || student.kerberos_id == "jazz"
@@ -999,11 +997,32 @@ end
 # ╔═╡ 64ce8106-2065-11eb-226c-0bcaf7e3f871
 face = process_raw_camera_data(wow)
 
+# ╔═╡ 06ac2efc-206f-11eb-1a73-9306bf5f7a9c
+let
+	face_skybox = image_skybox(face)
+	scene = [face_skybox, escher_sphere]
+	ray_trace(scene, escher_cam; num_intersections=3)
+end
+
 # ╔═╡ 7d03b258-2067-11eb-3070-1168e282b2ea
 padded(face)
 
 # ╔═╡ aa597a16-2066-11eb-35ae-3170468a90ed
 @bind escher_face_data camera_input()
+
+# ╔═╡ c68dbe1c-2066-11eb-048d-038df2c68a8b
+let
+	img = process_raw_camera_data(escher_face_data)
+	img_padded = padded(img)
+	
+	scene = [
+		image_skybox(padded(img)),
+
+		escher_sphere,
+	]
+	
+	ray_trace(scene, escher_cam; num_intersections=20)
+end
 
 # ╔═╡ ec31dce0-19c3-11eb-1487-23cc20cd5277
 hint(text) = Markdown.MD(Markdown.Admonition("hint", "Hint", [text]))
@@ -1082,6 +1101,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╠═daf80644-2070-11eb-3363-c577ae5846b3
 # ╠═a0b84f62-2047-11eb-348c-db83f4e6c39c
 # ╟─df3f2178-1ef5-11eb-3098-b1c8c67cf136
+# ╠═96f51f86-264e-4a4f-a9e1-40c9b444c043
 # ╠═6b91a58a-1ef6-11eb-1c36-2f44713905e1
 # ╟─04a86366-208b-11eb-1977-ff7e4ae6b714
 # ╠═a9754410-204d-11eb-123e-e5c5f87ae1c5
@@ -1089,8 +1109,8 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╠═7f788a7a-1293-410b-b52c-44789c8b539c
 # ╠═2899d5c0-cceb-4a08-8317-e2a2ddc1ccbb
 # ╠═95ca879a-204d-11eb-3473-959811aa8320
-# ╠═1f66ba6e-1ef8-11eb-10ba-4594f7c5ff19
 # ╟─d1970a34-1ef7-11eb-3e1f-0fd3b8e9657f
+# ╠═1f66ba6e-1ef8-11eb-10ba-4594f7c5ff19
 # ╠═16f4c8e6-2051-11eb-2f23-f7300abea642
 # ╟─7c804c30-208d-11eb-307c-076f2086ae73
 # ╟─67c0bd70-206a-11eb-3935-83d32c67f2eb
