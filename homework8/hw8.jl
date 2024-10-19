@@ -452,7 +452,7 @@ A third possibility explored in the lecture is that the objects can also have a 
 """
 
 # ╔═╡ a9754410-204d-11eb-123e-e5c5f87ae1c5
-function interact(ray::Photon, hit::Intersection{SkyBox}, ::Any, ::Any)
+function interact(ray::Photon, hit::Intersection{SkyBox})
 	
 	ray_color = hit.object.c(hit.point, hit.object)
 	Photon(hit.point, ray.l, ray_color, ray.ior)
@@ -468,20 +468,20 @@ function step_ray(ray::Photon, objects::Vector{O}, num_intersections) where {O <
     else
         hit = closest_hit(ray, objects)
 
-        if hit isa Miss 
+        if hit.object isa Miss 
             return ray
         end
-		if hit isa SkyBox
+		if hit.object isa SkyBox
 			return interact(ray, hit)
 		end
 		
 		reflected_ray = missing
 		refracted_ray = missing
 		
-        if hit isa Sphere
+        if hit.object isa Sphere
 			int_pt = intersection(ray, hit.object) 
 			sphere_normal = sphere_normal_at(int_pt.point, hit.object)
-            r_n = refract(ray.l, sphere_normal, ray.ior, hit.object.ior)  
+            r_n = refract(ray.l, sphere_normal, ray.ior, hit.object.s.ior)  
             r_ray = Photon(int_pt.point, r_n, ray.c, ray.ior) 
             return step_ray(r_ray, objects, num_intersections - 1)
         end
