@@ -24,10 +24,12 @@ begin
 			Pkg.PackageSpec(name="ImageMagick"),
 			Pkg.PackageSpec(name="Images", version="0.23"),
 			])
+	Pkg.add("FLoops")
 	using Plots
 	using PlutoUI
 	using LinearAlgebra
 	using Images
+	using FLoops  
 end
 
 # ╔═╡ 1df32310-19c4-11eb-0824-6766cd21aaf4
@@ -79,6 +81,18 @@ html"""
 
 # ╔═╡ 1e2cd0b0-19c4-11eb-3583-0b82092139aa
 md"_Let's create a package environment:_"
+
+# ╔═╡ 315c6c55-4851-44b3-92d1-4cfc5b610706
+
+
+# ╔═╡ e5a8efc1-312a-4069-82d3-7a353c875382
+begin
+	# Testing floops
+    @floop for i in 1:10
+        println(i)
+    end
+end
+
 
 # ╔═╡ 4e917968-1f87-11eb-371f-e3899b76dc24
 md"""
@@ -452,59 +466,106 @@ A third possibility explored in the lecture is that the objects can also have a 
 """
 
 # ╔═╡ a9754410-204d-11eb-123e-e5c5f87ae1c5
+# ╠═╡ disabled = true
+#=╠═╡
 function interact(ray::Photon, hit::Intersection{SkyBox})
-	
 	ray_color = hit.object.c(hit.point, hit.object)
 	Photon(hit.point, ray.l, ray_color, ray.ior)
 end
+  ╠═╡ =#
 
 # ╔═╡ 086e1956-204e-11eb-2524-f719504fb95b
+# ╠═╡ disabled = true
+#=╠═╡
 interact(photon::Photon, ::Miss, ::Any, ::Any) = photon
+  ╠═╡ =#
+
+# ╔═╡ 7f788a7a-1293-410b-b52c-44789c8b539c
+# ╠═╡ disabled = true
+#=╠═╡
+function interact(photon::Photon, hit::Intersection{Sphere}, num_intersections::Int64, objects::Vector{Object})
+    reflection_dir = refract(photon.l, sphere_normal_at(hit.point, hit.object), photon.ior, hit.object.s.ior)
+    reflected_photon = Photon(hit.point, reflection_dir, photon.c, photon.ior)
+    return step_ray(reflected_photon, objects, num_intersections - 1)
+end
+
+  ╠═╡ =#
+
+# ╔═╡ 2899d5c0-cceb-4a08-8317-e2a2ddc1ccbb
+# ╠═╡ disabled = true
+#=╠═╡
+function interact_r(photon::Photon, hit::Intersection{Sphere}, num_intersections::Int64, objects::Vector{Object})
+    reflection_dir = reflect(photon.l, sphere_normal_at(hit.point, hit.object))
+    reflected_photon = Photon(hit.point, reflection_dir, photon.c, photon.ior)
+    return step_ray(reflected_photon, objects, num_intersections - 1)
+end
+
+  ╠═╡ =#
 
 # ╔═╡ 95ca879a-204d-11eb-3473-959811aa8320
+begin
+	
+function interact_r(photon::Photon, hit::Intersection{Sphere}, num_intersections::Int64, objects::Vector{Object})
+    reflection_dir = reflect(photon.l, sphere_normal_at(hit.point, hit.object))
+    reflected_photon = Photon(hit.point, reflection_dir, photon.c, photon.ior)
+    return step_ray(reflected_photon, objects, num_intersections - 1)
+end
+	
+function interact(photon::Photon, hit::Intersection{Sphere}, num_intersections::Int64, objects::Vector{Object})
+    reflection_dir = refract(photon.l, sphere_normal_at(hit.point, hit.object), photon.ior, hit.object.s.ior)
+    reflected_photon = Photon(hit.point, reflection_dir, photon.c, photon.ior)
+    return step_ray(reflected_photon, objects, num_intersections - 1)
+end
+	
+interact(photon::Photon, ::Miss, ::Any, ::Any) = photon
+
+function interact(ray::Photon, hit::Intersection{SkyBox})
+	ray_color = hit.object.c(hit.point, hit.object)
+	Photon(hit.point, ray.l, ray_color, ray.ior)
+end
+	
 function step_ray(ray::Photon, objects::Vector{O}, num_intersections) where {O <: Object}
     if num_intersections == 0
         return ray
     else
         hit = closest_hit(ray, objects)
 
-        if hit.object isa Miss 
+        if hit isa Miss 
             return ray
         end
+		
 		if hit.object isa SkyBox
 			return interact(ray, hit)
 		end
 		
-		reflected_ray = missing
-		refracted_ray = missing
+		int_pt = intersection(ray, hit.object) 
+		sphere_normal = sphere_normal_at(int_pt.point, hit.object)
+
 		
-        if hit.object isa Sphere
-			int_pt = intersection(ray, hit.object) 
-			sphere_normal = sphere_normal_at(int_pt.point, hit.object)
-            r_n = refract(ray.l, sphere_normal, ray.ior, hit.object.s.ior)  
-            r_ray = Photon(int_pt.point, r_n, ray.c, ray.ior) 
-            return step_ray(r_ray, objects, num_intersections - 1)
-        end
-		#=
-		if hit isa Sphere
-            refr_n = refract(ray.l, sphere_normal,)  
-            refr_ray = Photon(int_pt.point, refr_n, ray.c, ray.ior) 
-            refracted_ray = step_ray(refr_ray, objects, num_intersections - 1)
-        end
-		=#
-        return interact(ray, hit, num_intersections, objects)
+        refracted_ray = interact(ray, hit, num_intersections - 1, objects)
+        
+		
+        reflected_ray = interact_r(ray, hit, num_intersections - 1, objects)
+        
+
+        final_color = reflected_ray.c*hit.object.s.r + refracted_ray.c*hit.object.s.t
+		final_color += hit.object.s.c*hit.object.s.c.alpha
+
+        return Photon(hit.point, ray.l, final_color, ray.ior)
     end
 end
-
+end
 
 # ╔═╡ 6b91a58a-1ef6-11eb-1c36-2f44713905e1
 function ray_trace(objects::Vector{O}, cam::Camera;
 				   num_intersections = 10) where {O <: Object}
 	rays = init_rays(cam)
+	@floop ThreadedEx(basesize=length(rays)÷8) for i=1:length(rays)
+		rays[i] = step_ray(rays[i], objects, num_intersections)
+	#new_rays = step_ray.(rays, [objects], [num_intersections])
+	end
 
-	new_rays = step_ray.(rays, [objects], [num_intersections])
-
-	extract_colors(new_rays)
+	extract_colors(rays)
 end
 
 # ╔═╡ a0b84f62-2047-11eb-348c-db83f4e6c39c
@@ -512,14 +573,6 @@ let
 	scene = [sky]
 	ray_trace(scene, basic_camera; num_intersections=4)
 end
-
-# ╔═╡ 7f788a7a-1293-410b-b52c-44789c8b539c
-function interact(photon::Photon, hit::Intersection{Sphere}, num_intersections, objects::Vector{Object})
-    reflection_dir = refract(photon.l, sphere_normal_at(hit.point, hit.object), photon.ior, hit.object.s.ior)
-    reflected_photon = Photon(hit.point, reflection_dir, photon.c, photon.ior)
-    return step_ray(reflected_photon, objects, num_intersections - 1)
-end
-
 
 # ╔═╡ d1970a34-1ef7-11eb-3e1f-0fd3b8e9657f
 md"""
@@ -534,26 +587,26 @@ main_scene = [
 		Surface(1.0, 0.0, RGBA(1,1,1,0.0), 1.5)),
 	
 	Sphere([0,50,-100], 20, 
-		Surface(0.0, 1.0, RGBA(0,0,0,0.0), 1.0)),
+		Surface(0.7, 0.3, RGBA(0,1,0,0.0), 1.0)),
 	
 	Sphere([-50,0,-25], 20, 
-		Surface(0.0, 0.0, RGBA(0, .3, .8, 1), 1.0)),
+		Surface(0.4, 0.32, RGBA(0, .3, .8, 1), 1.13)),
 	
 	Sphere([30, 25, -60], 20,
 		Surface(0.0, 0.75, RGBA(1,0,0,0.25), 1.5)),
 	
 	Sphere([50, 0, -25], 20,
-		Surface(0.5, 0.0, RGBA(.1,.9,.1,0.5), 1.5)),
+		Surface(0.5, 0.5, RGBA(.1,.9,.1,0.5), 1.5)),
 	
 	Sphere([-30, 25, -60], 20,
-		Surface(0.5, 0.5, RGBA(1,1,1,0), 1.5)),
+		Surface(0.5, 0.3, RGBA(1,1,1,0), 1.5)),
 ]
 
 # ╔═╡ 1f66ba6e-1ef8-11eb-10ba-4594f7c5ff19
-let
-	cam = Camera((800,600), 16, -15, [0,10,100])
+@time let
+	cam = Camera((1920,1080), 16, -15, [0,10,100])
 
-	ray_trace(main_scene, cam; num_intersections=1000)
+	ray_trace(main_scene, cam; num_intersections=10)
 end
 
 # ╔═╡ 67c0bd70-206a-11eb-3935-83d32c67f2eb
@@ -639,6 +692,16 @@ Great! It's like the Earth, but distorted. Notice that the continents are mirror
 Okay, self portrait time! Let's take a picture using your webcam, and we will use it as the skybox texture:
 """
 
+# ╔═╡ 06ac2efc-206f-11eb-1a73-9306bf5f7a9c
+# ╠═╡ disabled = true
+#=╠═╡
+let
+	face_skybox = image_skybox(face)
+	scene = [face_skybox, escher_sphere]
+	ray_trace(scene, escher_cam; num_intersections=3)
+end
+  ╠═╡ =#
+
 # ╔═╡ 48166866-2070-11eb-2722-556a6719c2a2
 md"""
 👀 wow! It's _Planet $(student.name)_, surrounded by even more $(student.name). 
@@ -660,6 +723,23 @@ end
 md"""
 Let's put it all together!
 """
+
+# ╔═╡ c68dbe1c-2066-11eb-048d-038df2c68a8b
+# ╠═╡ disabled = true
+#=╠═╡
+let
+	img = process_raw_camera_data(escher_face_data)
+	img_padded = padded(img)
+	
+	scene = [
+		image_skybox(padded(img)),
+
+		escher_sphere,
+	]
+	
+	ray_trace(scene, escher_cam; num_intersections=20)
+end
+  ╠═╡ =#
 
 # ╔═╡ ebd05bf0-19c3-11eb-2559-7d0745a84025
 if student.name == "Jazzy Doe" || student.kerberos_id == "jazz"
@@ -919,32 +999,11 @@ end
 # ╔═╡ 64ce8106-2065-11eb-226c-0bcaf7e3f871
 face = process_raw_camera_data(wow)
 
-# ╔═╡ 06ac2efc-206f-11eb-1a73-9306bf5f7a9c
-let
-	face_skybox = image_skybox(face)
-	scene = [face_skybox, escher_sphere]
-	ray_trace(scene, escher_cam; num_intersections=3)
-end
-
 # ╔═╡ 7d03b258-2067-11eb-3070-1168e282b2ea
 padded(face)
 
 # ╔═╡ aa597a16-2066-11eb-35ae-3170468a90ed
 @bind escher_face_data camera_input()
-
-# ╔═╡ c68dbe1c-2066-11eb-048d-038df2c68a8b
-let
-	img = process_raw_camera_data(escher_face_data)
-	img_padded = padded(img)
-	
-	scene = [
-		image_skybox(padded(img)),
-
-		escher_sphere,
-	]
-	
-	ray_trace(scene, escher_cam; num_intersections=20)
-end
 
 # ╔═╡ ec31dce0-19c3-11eb-1487-23cc20cd5277
 hint(text) = Markdown.MD(Markdown.Admonition("hint", "Hint", [text]))
@@ -984,6 +1043,8 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─e4d2f6f6-2089-11eb-0b4a-0d22f72f72ba
 # ╟─1e2cd0b0-19c4-11eb-3583-0b82092139aa
 # ╠═c3e52bf2-ca9a-11ea-13aa-03a4335f2906
+# ╠═315c6c55-4851-44b3-92d1-4cfc5b610706
+# ╠═e5a8efc1-312a-4069-82d3-7a353c875382
 # ╟─4e917968-1f87-11eb-371f-e3899b76dc24
 # ╠═24b0d4ba-192c-11eb-0f66-e77b544b0510
 # ╟─c6e8d30e-205c-11eb-271c-6165a164073d
@@ -1026,6 +1087,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╠═a9754410-204d-11eb-123e-e5c5f87ae1c5
 # ╠═086e1956-204e-11eb-2524-f719504fb95b
 # ╠═7f788a7a-1293-410b-b52c-44789c8b539c
+# ╠═2899d5c0-cceb-4a08-8317-e2a2ddc1ccbb
 # ╠═95ca879a-204d-11eb-3473-959811aa8320
 # ╠═1f66ba6e-1ef8-11eb-10ba-4594f7c5ff19
 # ╟─d1970a34-1ef7-11eb-3e1f-0fd3b8e9657f
