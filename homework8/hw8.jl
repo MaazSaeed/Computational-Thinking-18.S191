@@ -749,9 +749,13 @@ Cube(
 
 # ╔═╡ 1f66ba6e-1ef8-11eb-10ba-4594f7c5ff19
 @time let
-	cam = Camera((960, 540), 16, -15, [0,60,210])
+	cam = Camera((5400, 3600), 16, -15, [0,60,210])
 
-	ray_trace(main_scene, cam; num_intersections=10)
+	img = map(clamp01nan,ray_trace(main_scene, cam; num_intersections=10))
+
+	save("D:\\Computational Thinking\\Computational-Thinking-18.S191\\homework8\\cubes_and_spheres.png", img)
+
+	img
 end
 
 # ╔═╡ 67c0bd70-206a-11eb-3935-83d32c67f2eb
