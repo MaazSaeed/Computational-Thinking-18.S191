@@ -249,57 +249,84 @@ end
 function intersection(ray::Photon, cube::Cube)
     tmin = -Inf
     tmax = Inf
-
-    for i in 1:3  
-        invD = 1.0 / ray.l[i]  
-        t0 = (cube.min[i] - ray.p[i]) * invD  
-        t1 = (cube.max[i] - ray.p[i]) * invD 
-
-        if invD < 0  
-            t0, t1 = t1, t0  
+    ϵ = 1e-6  
+    
+    for i in 1:3
+        if abs(ray.l[i]) < ϵ
+            if ray.p[i] < cube.min[i] || ray.p[i] > cube.max[i]
+                return Miss()
+            end
+            continue
         end
-
-        tmin = max(tmin, t0)  
-        tmax = min(tmax, t1)  
-
-        if tmin > tmax 
-            return Miss()  
+        
+        invD = 1.0 / ray.l[i]
+        t0 = (cube.min[i] - ray.p[i]) * invD
+        t1 = (cube.max[i] - ray.p[i]) * invD
+        
+        if invD < 0
+            t0, t1 = t1, t0
+        end
+        
+        tmin = max(tmin, t0)
+        tmax = min(tmax, t1)
+        
+        if tmin > tmax + ϵ
+            return Miss()
         end
     end
-
-    if tmax < 0  
-        return Miss()
+    
+    t = tmin
+    if t < ϵ 
+        if tmax > ϵ
+            t = tmax  
+        else
+            return Miss()
+        end
     end
-
-    intersection_point = ray.p .+ tmin .* ray.l  
-    return Intersection(cube, sqrt(sum((intersection_point - ray.p).^2)), intersection_point)
+    
+    intersection_point = ray.p + t * ray.l
+    
+    for i in 1:3
+        if intersection_point[i] < cube.min[i] - ϵ || 
+           intersection_point[i] > cube.max[i] + ϵ
+            return Miss()
+        end
+    end
+    
+    return Intersection(cube, t, intersection_point)
 end
-
 
 # ╔═╡ 4ec204c2-af19-4b2f-bd89-424b69a06f66
 function cube_normal_at(p::Vector{Float64}, c::Cube)
     min_corner = c.min
     max_corner = c.max
-
-    ϵ = 1e-9 
-
-    if abs(p[1] - min_corner[1]) < ϵ
-        return [-1.0, 0.0, 0.0]  # Left face
-    elseif abs(p[1] - max_corner[1]) < ϵ
-        return [1.0, 0.0, 0.0]   # Right face
-    elseif abs(p[2] - min_corner[2]) < ϵ
-        return [0.0, -1.0, 0.0]  # Bottom face
-    elseif abs(p[2] - max_corner[2]) < ϵ
-        return [0.0, 1.0, 0.0]   # Top face
-    elseif abs(p[3] - min_corner[3]) < ϵ
-        return [0.0, 0.0, -1.0]  # Back face
-    elseif abs(p[3] - max_corner[3]) < ϵ
-        return [0.0, 0.0, 1.0]   # Front face
-    else
-        return Miss()  
+    ϵ = 1e-6  
+    
+    distances = [
+        abs(p[1] - min_corner[1]),  
+        abs(p[1] - max_corner[1]),  
+        abs(p[2] - min_corner[2]),  
+        abs(p[2] - max_corner[2]),  
+        abs(p[3] - min_corner[3]),  
+        abs(p[3] - max_corner[3])   
+    ]
+    
+    min_dist = minimum(distances)
+    if min_dist > ϵ
+        return Miss()
     end
+    
+   
+    face_idx = argmin(distances)
+    return [
+        [-1.0, 0.0, 0.0],  
+        [1.0, 0.0, 0.0],   
+        [0.0, -1.0, 0.0],  
+        [0.0, 1.0, 0.0],  
+        [0.0, 0.0, -1.0],  
+        [0.0, 0.0, 1.0]    
+    ][face_idx]
 end
-
 
 # ╔═╡ 452d6668-1ec7-11eb-3b0a-0b8f45b43fd5
 md"""
@@ -590,96 +617,74 @@ end
 
 # ╔═╡ 95ca879a-204d-11eb-3473-959811aa8320
 begin
-	
-function interact_r(photon::Photon, hit::Intersection{Sphere}, num_intersections::Int64, objects::Vector{Object})
-	if hit.object.s.r < 0.01
-		return photon
-	end
-    reflection_dir = reflect(photon.l, sphere_normal_at(hit.point, hit.object))
-    reflected_photon = Photon(hit.point, reflection_dir, photon.c, photon.ior)
-    return step_ray(reflected_photon, objects, num_intersections - 1)
-end
-	
-function interact(photon::Photon, hit::Intersection{Sphere}, num_intersections::Int64, objects::Vector{Object})
-	if hit.object.s.t < 0.01
-		return photon
-	end
-	
-    refraction_dir = refract(photon.l, sphere_normal_at(hit.point, hit.object), photon.ior, hit.object.s.ior)
-    refraction_photon = Photon(hit.point, refraction_dir, photon.c, photon.ior)
-    return step_ray(refraction_photon, objects, num_intersections - 1)
-end
-	
-interact(photon::Photon, ::Miss, ::Any, ::Any) = photon
-
-function interact(ray::Photon, hit::Intersection{SkyBox})
-	ray_color = hit.object.c(hit.point, hit.object)
-	Photon(hit.point, ray.l, ray_color, ray.ior)
-end
-
-function interact(photon::Photon, hit::Intersection{Cube}, num_intersections::Int64, objects::Vector{Object})
-
-	n_c = cube_normal_at(hit.point, hit.object)
-	if n_c isa Miss
-		return step_ray(photon, objects, num_intersections - 1)
-	end
-    reflection_dir = refract(photon.l, normalize(n_c), photon.ior, hit.object.s.ior)
-    reflected_photon = Photon(hit.point, reflection_dir, hit.object.s.c, photon.ior)
-    return step_ray(reflected_photon, objects, num_intersections - 1)
-end
-
-function interact_r(photon::Photon, hit::Intersection{Cube}, num_intersections::Int64, objects::Vector{Object})
-
-	n_c = cube_normal_at(hit.point, hit.object)
-	if n_c isa Miss
-		return step_ray(photon, objects, num_intersections - 1)
-	end
-    refraction_dir = reflect(photon.l, normalize(n_c))
-    refracted_photon = Photon(hit.point, refraction_dir, photon.c, photon.ior)
-    return step_ray(refracted_photon, objects, num_intersections - 1)
-end
-
-	
-function step_ray(ray::Photon, objects::Vector{O}, num_intersections) where {O <: Object}
-    if num_intersections <= 0
-        return ray
-    else
+    function interact_r(photon::Photon, hit::Intersection{Sphere}, num_intersections::Int64, objects::Vector{Object})
+        if hit.object.s.r < 0.01
+            return photon
+        end
+        reflection_dir = reflect(photon.l, sphere_normal_at(hit.point, hit.object))
+        reflected_photon = Photon(hit.point, reflection_dir, photon.c, photon.ior)
+        return step_ray(reflected_photon, objects, num_intersections - 1)
+    end
+    
+    function interact(photon::Photon, hit::Intersection{Sphere}, num_intersections::Int64, objects::Vector{Object})
+        if hit.object.s.t < 0.01
+            return photon
+        end
+        refraction_dir = refract(photon.l, sphere_normal_at(hit.point, hit.object), photon.ior, hit.object.s.ior)
+        refracted_photon = Photon(hit.point, refraction_dir, photon.c, hit.object.s.ior)
+        return step_ray(refracted_photon, objects, num_intersections - 1)
+    end
+    
+    interact(photon::Photon, ::Miss, ::Any, ::Any) = photon
+    
+    function interact(ray::Photon, hit::Intersection{SkyBox})
+        ray_color = hit.object.c(hit.point, hit.object)
+        Photon(hit.point, ray.l, ray_color, ray.ior)
+    end
+    
+    function interact(photon::Photon, hit::Intersection{Cube}, num_intersections::Int64, objects::Vector{Object})
+        n_c = cube_normal_at(hit.point, hit.object)
+        if n_c isa Miss
+            return photon
+        end
+        refraction_dir = refract(photon.l, normalize(n_c), photon.ior, hit.object.s.ior)
+        refracted_photon = Photon(hit.point, refraction_dir, photon.c, hit.object.s.ior)
+        return step_ray(refracted_photon, objects, num_intersections - 1)
+    end
+    
+    function interact_r(photon::Photon, hit::Intersection{Cube}, num_intersections::Int64, objects::Vector{Object})
+        n_c = cube_normal_at(hit.point, hit.object)
+        if n_c isa Miss
+            return photon
+        end
+        reflection_dir = reflect(photon.l, normalize(n_c))
+        reflected_photon = Photon(hit.point, reflection_dir, photon.c, photon.ior)
+        return step_ray(reflected_photon, objects, num_intersections - 1)
+    end
+    
+    function step_ray(ray::Photon, objects::Vector{O}, num_intersections) where {O <: Object}
+        if num_intersections <= 0
+            return ray
+        end
+        
         hit = closest_hit(ray, objects)
-
         if hit isa Miss 
             return ray
         end
-		
-		if hit.object isa SkyBox
-			return interact(ray, hit)
-		end
-
-		if hit.object isa Cube
-        	refracted_ray = interact(ray, hit, num_intersections - 1, objects)
-        	reflected_ray = interact_r(ray, hit, num_intersections - 1, objects)
-
-	        final_color = reflected_ray.c*hit.object.s.r + refracted_ray.c*hit.object.s.t
-			final_color += hit.object.s.c*hit.object.s.c.alpha
-	
-	        return Photon(hit.point, ray.l, final_color, ray.ior)
-		end
-		
-		int_pt = intersection(ray, hit.object) 
-		sphere_normal = sphere_normal_at(int_pt.point, hit.object)
-
-		
-        refracted_ray = interact(ray, hit, num_intersections - 1, objects)
         
-		
+        if hit.object isa SkyBox
+            return interact(ray, hit)
+        end
+        
+        refracted_ray = interact(ray, hit, num_intersections - 1, objects)
         reflected_ray = interact_r(ray, hit, num_intersections - 1, objects)
         
-
-        final_color = reflected_ray.c*hit.object.s.r + refracted_ray.c*hit.object.s.t
-		final_color += hit.object.s.c*hit.object.s.c.alpha
-
+        final_color = reflected_ray.c * hit.object.s.r +  
+                     refracted_ray.c * hit.object.s.t +   
+                     hit.object.s.c * hit.object.s.c.alpha 
+        
         return Photon(hit.point, ray.l, final_color, ray.ior)
     end
-end
 end
 
 # ╔═╡ 6b91a58a-1ef6-11eb-1c36-2f44713905e1
@@ -712,8 +717,8 @@ main_scene = [
 		Sphere([0,0,-25], 20, 
 		Surface(1.0, 0.0, RGBA(1,1,1,0.0), 1.5)),
 	
-	Sphere([0,50,-100], 20, 
-		Surface(0.6, 0.4, RGBA(0,1,0,0.0), 1.8)),
+	Sphere([0,50,-100], 25, 
+		Surface(0.9, 0.1, RGBA(0,1,0,0.0), 1.8)),
 	
 	Sphere([-50,0,-25], 20, 
 		Surface(0.0, 0.0, RGBA(0, .3, .8, 1), 1.33)),
@@ -729,21 +734,24 @@ main_scene = [
 	Sphere([-90, 25, -60], 20,
 		Surface(0.75, 0.25, RGBA(0.1,1.0,0.1,0), 1.2)),
 	
-	Sphere([120, 25, -60], 20,
+	Sphere([120, 25, -60], 25,
 		Surface(0.2, 0.8, RGBA(1.0,0.1,0.0,0.8), 1.5)),
 	
 	Cube([-15, 80, -120],  
     [15, 110, -80],
-    Surface(1.0, 0.0, RGBA(1,1,1,0.0), 1.5)),
+    Surface(1.0, 0.0, RGBA(0.72, 0.72, 0.72,0.0), 1.2)),
 	Cube(
-	[-55, 90, -120],  
-    [-35, 120, -80],
-    Surface(1.0, 0.0, RGBA(1,1,1,0.0), 1.5)),
+	[-55, 30, -120],  
+    [-35, 70, -80],
+    Surface(0.1, 0.9, RGBA(1,0,0,.2), 1.33)),
 
 Cube(
     [35, 90, -120],  
     [55, 120, -80],
-    Surface(1.0, 0.0, RGBA(1.0, 0.7, 0.2, 1), 1.33))
+    Surface(1.0, 0.0, RGBA(1.0, 0.0, 0.0, 1), 1.22)),
+
+	Sphere([0,110,50], 17, 
+			Surface(1.0, 0.0, RGBA(1,1,1,0.0), 1.5))
 
 ]
 
@@ -751,12 +759,15 @@ Cube(
 @time let
 	cam = Camera((5400, 3600), 16, -15, [0,60,210])
 
-	img = map(clamp01nan,ray_trace(main_scene, cam; num_intersections=10))
+	img = map(clamp01nan,ray_trace(main_scene, cam; num_intersections=20))
 
 	save("D:\\Computational Thinking\\Computational-Thinking-18.S191\\homework8\\cubes_and_spheres.png", img)
 
 	img
 end
+
+# ╔═╡ acede744-2390-4de1-ab1c-411fcc69eb4e
+
 
 # ╔═╡ 67c0bd70-206a-11eb-3935-83d32c67f2eb
 md"""
@@ -1240,6 +1251,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─d1970a34-1ef7-11eb-3e1f-0fd3b8e9657f
 # ╠═1f66ba6e-1ef8-11eb-10ba-4594f7c5ff19
 # ╠═16f4c8e6-2051-11eb-2f23-f7300abea642
+# ╠═acede744-2390-4de1-ab1c-411fcc69eb4e
 # ╟─7c804c30-208d-11eb-307c-076f2086ae73
 # ╟─67c0bd70-206a-11eb-3935-83d32c67f2eb
 # ╟─748cbaa2-206c-11eb-2cc9-7fa74308711b
