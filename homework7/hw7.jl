@@ -22,6 +22,7 @@ begin
 			Pkg.PackageSpec(name="Plots", version="1.6-1"),
 			Pkg.PackageSpec(name="PlutoUI", version="0.6.8-0.6"),
 			])
+	Pkg.add("GR")  
 	using Plots
 	using PlutoUI
 	using LinearAlgebra
@@ -134,7 +135,7 @@ function plot_object!(p, wall::Wall)
 	
 	line = [a, b]
 	
-	plot!(p, first.(line), last.(line), label="Wall")
+	plot!(p, first.(line), last.(line), label="Mirror", lw=3)
 	# xlims!(p, old_xlims)
 	# xlims!(p, old_xlims)
 end
@@ -192,7 +193,7 @@ test_photon = Photon([-1, 2], normalize([1,-.8]), 1.0)
 function plot_photon_arrow!(p, photon::Photon, length=2; kwargs...)
 	line = [photon.p, photon.p .+ length*photon.l]
 	
-	plot!(p, first.(line), last.(line); lw=2, arrow=true, color=:darkred, kwargs..., label=nothing)
+	plot!(p, first.(line), last.(line); lw=2, arrow=true, color=:red, kwargs..., label=nothing)
 	scatter!(p, photon.p[1:1], photon.p[2:2]; color=:darkred, markersize=3, label=nothing, kwargs...)
 end
 
@@ -430,7 +431,7 @@ md"""
 """
 
 # ╔═╡ 3cd36ac0-1a09-11eb-1818-75b36e67594a
-@bind mirror_test_ray_N Slider(1:30; default=4)
+@bind mirror_test_ray_N Slider(0:30; default=4, show_value=true)
 
 # ╔═╡ 7478330a-1c81-11eb-2f9f-099f1111032c
 md"""
@@ -878,17 +879,24 @@ end
 
 # ╔═╡ 1ee0787e-1a08-11eb-233b-43a654f70117
 let
-	p = plot_scene(ex_1_scene, legend=false, xlim=(-11,11), ylim=(-11,11))
 	
-	path = trace(philip, ex_1_scene, mirror_test_ray_N)
+	p = plot_scene(ex_1_scene, legend=false, xlim=(-11,11), ylim=(-11,11), background_color=:black)
+
+	anim = @animate for i=0:9 
 	
+		path = trace(philip, ex_1_scene, i)
+		
+		
+		line = [philip.p, [r.p for r in path]...]
+		plot!(p, first.(line), last.(line), lw=4, color=:orange)
+		
+		plot_photon_arrow!(p, philip)
+		plot_photon_arrow!.([p], path)
+	end every 1
+
+	gif(anim, "photon_tracer.gif", fps=5)
 	
-	line = [philip.p, [r.p for r in path]...]
-	plot!(p, first.(line), last.(line), lw=5, color=:orange)
-	
-	plot_photon_arrow!(p, philip)
-	plot_photon_arrow!.([p], path)
-	
+	savefig(p, "photon_tracer.png")
 	p
 end |> as_svg
 
@@ -961,9 +969,6 @@ md"""
 👉 Recreate the spherical aberration figure from [the lecture](https://www.youtube.com/watch?v=MkkZb5V6HqM) (around the end of the video), and make the index of refraction interactive using a `Slider`. _Or make something else!_
 """
 
-# ╔═╡ 5f3d6704-0157-4276-b8cc-9837ff0feb96
-
-
 # ╔═╡ 70de44da-b93d-456c-a86c-90b6c38cf70f
 @bind right_mirror Slider(25:0.01:60, show_value=true)
 
@@ -974,13 +979,13 @@ md"""
 @bind top_mirror Slider(20:0.01:40, show_value=true)
 
 # ╔═╡ acf8a6f1-d7bd-4775-90b2-af07349ebaec
-@bind path_len Slider(1:6; default=4)
-
-# ╔═╡ 0719555a-842a-47f6-b9b1-2b38633ebe20
-
+@bind path_len Slider(1:10; default=4)
 
 # ╔═╡ 9654d877-1f02-4513-85cf-6ae7b5dc3ffe
 @bind ior_lens Slider(1.0:0.01:2.5, show_value=true)
+
+# ╔═╡ 69d688f1-ff41-41d6-9e92-4871567669c8
+@bind lens_x_pos Slider(-40:0.01:40, show_value=true)
 
 # ╔═╡ 270762e4-1ca4-11eb-2fb4-392e5c3b3e04
 begin
@@ -1000,20 +1005,38 @@ begin
 	    [1, 0]),
 	]
 
-	sphere_lens = Sphere([0, 0], 22, ior_lens)
+	rad = 10
+	sphere_lens = Sphere([lens_x_pos, 0], rad, ior_lens)
 
 	scene_abberation = [sphere_lens, mirrors...]
-	p = plot_scene(scene_abberation, legend=false, xlim=(-60, 60), ylim=(-40 , 40))
-
-	photons = [Photon([left_mirror, -2i], [1, 0], 1.0) for i=-10:10]
-	for photon in photons
-		path = accumulate(1:path_len; init=photon) do old_photon, i
-			step_ray(old_photon, scene_abberation)
-		end
+	p = plot_scene(scene_abberation,  legend=:topright,
+    legendfontsize=6,              
+    legend_margin=1,               
+    legend_spacing=1,
+	legend_background_color=:black,
+    compact=true, xlim=(-60, 60), ylim=(-40 , 40), background=:black, grid=true,minorgrid=true,       
+    minorgridalpha=0.2)
 	
-		line = [photon.p, [r.p for r in path]...]
-		plot!(p, first.(line), last.(line), lw=1, color=:red)
-	end
+	photons = [Photon([left_mirror, -i/2], [1, 0], 1.0) for i=-rad*2+1:rad*2-1]
+	doOnce = true
+
+	anim = @animate for photon in photons
+	    path = accumulate(1:path_len; init=photon) do old_photon, i
+	        step_ray(old_photon, scene_abberation)
+	    end
+	    
+	    line = [photon.p, [r.p for r in path]...]
+	    plot!(p, first.(line), last.(line), 
+	          lw=0.4, 
+	          color=:white, 
+	          label=doOnce ? "ray" : false)
+	    global doOnce = false
+		
+	end every 1
+
+	gif(anim, "ray_tracer.gif", fps=10)
+
+	savefig(p, "spherical_abberation.png")
 	p
 end
 
@@ -1199,7 +1222,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╠═99c61b74-1941-11eb-2323-2bdb7c120a28
 # ╠═0906b340-19d3-11eb-112c-e568f69deb5d
 # ╠═e45e1d36-1a12-11eb-2720-294c4be6e9fd
-# ╟─6de1bafc-1a01-11eb-3d67-c9d9b6c3cea8
+# ╠═6de1bafc-1a01-11eb-3d67-c9d9b6c3cea8
 # ╠═eff9329e-1a05-11eb-261f-734127d36750
 # ╟─5f551588-1ac4-11eb-1f86-197442f1ef1d
 # ╠═ac9bafaa-1ac4-11eb-16c4-0df8133f9c98
@@ -1209,44 +1232,44 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─e5ed6098-1c70-11eb-0b58-31d1830b9a10
 # ╠═24b0d4ba-192c-11eb-0f66-e77b544b0510
 # ╠═925e98d4-1c78-11eb-230d-994518f0060e
-# ╟─76d4351c-1c78-11eb-243f-5f6f5e485d5d
-# ╟─eabca8ce-1c73-11eb-26ad-271f6eba889b
+# ╠═76d4351c-1c78-11eb-243f-5f6f5e485d5d
+# ╠═eabca8ce-1c73-11eb-26ad-271f6eba889b
 # ╟─aa43ef1c-1941-11eb-04de-552719a08da0
 # ╠═8acef4b0-1a09-11eb-068d-79a259244ed1
 # ╠═8018fbf0-1a05-11eb-3032-95aae07ca78f
 # ╟─e9c5d68c-1ac2-11eb-04ec-3b72eb133239
 # ╠═5a9d00f6-1ac3-11eb-01fb-53c35796e766
-# ╟─5aa7c4e8-1ac3-11eb-23f3-03bd58e75c4b
+# ╠═5aa7c4e8-1ac3-11eb-23f3-03bd58e75c4b
 # ╠═9df1d0f2-1ac3-11eb-0eac-d90eccca669c
 # ╠═ba897f0d-368a-427b-b6ee-3cbb18313ddd
 # ╠═9b179f2c-8001-4f1f-ae6f-4da49da94f3c
 # ╠═bc10541e-1ac3-11eb-0b5f-916922f1a8e8
 # ╟─d39f149e-1ac3-11eb-39a2-41c2030d7d49
-# ╟─e135d490-1ac2-11eb-053e-914051f16e31
+# ╠═e135d490-1ac2-11eb-053e-914051f16e31
 # ╠═abe3de54-1ca0-11eb-01cd-11fe798bfb97
 # ╟─0787f130-1aca-11eb-24b4-2ff2ddd0bc48
 # ╟─42d65f56-1aca-11eb-1079-e32f85554349
 # ╠═a5847264-1ca0-11eb-0b45-eb5388f6e688
 # ╟─038d5e88-1ac7-11eb-2020-a9d7e19feebc
-# ╟─6544be90-19d3-11eb-153c-218025f738c6
+# ╠═6544be90-19d3-11eb-153c-218025f738c6
 # ╠═a306e880-19eb-11eb-0ff1-d7ef49777f63
 # ╠═3663bf80-1a06-11eb-3596-8fbbed28cc38
-# ╟─7f286ccc-1c75-11eb-1270-95a87840b300
-# ╟─d70380a4-1ad0-11eb-1184-f7e9b84a83ad
+# ╠═7f286ccc-1c75-11eb-1270-95a87840b300
+# ╠═d70380a4-1ad0-11eb-1184-f7e9b84a83ad
 # ╠═55187168-1c78-11eb-1182-ab4336b577a4
 # ╟─2158a356-1a05-11eb-3f5b-4dfa810fc602
 # ╠═5501a700-19ec-11eb-0ded-53e41f7f821a
 # ╟─87a8e280-1c7c-11eb-2bb0-034011f6c10f
 # ╠═1b0c0e4c-1c73-11eb-225d-23c731455755
 # ╟─4d69c36a-1c73-11eb-3ae3-23900db09c27
-# ╟─e055262c-1c73-11eb-14de-2f537a19b012
-# ╟─5342430e-1c79-11eb-261c-15abd0f8cfc1
+# ╠═e055262c-1c73-11eb-14de-2f537a19b012
+# ╠═5342430e-1c79-11eb-261c-15abd0f8cfc1
 # ╠═6c37c5f4-1a09-11eb-08ae-9dce752f29cb
 # ╟─052dc502-1c7a-11eb-2316-d3a1eef2af94
 # ╠═c3090e4a-1a09-11eb-0f32-d3bbfd9992e0
 # ╟─55f475a8-1c7a-11eb-377e-91d07fa0bdb6
 # ╠═63ef21c6-1c7a-11eb-2f3c-c5ac16bc289f
-# ╟─6cf7df1a-1c7a-11eb-230b-df1333f191c7
+# ╠═6cf7df1a-1c7a-11eb-230b-df1333f191c7
 # ╠═19cf420e-1c7c-11eb-1cb8-dd939fee1276
 # ╠═c26f5b99-bb8c-4697-ac55-8bd198ad33a5
 # ╠═b8cd4112-1c7c-11eb-3b2d-29170ad9beb5
@@ -1262,8 +1285,8 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╠═2c6defd0-1ca1-11eb-17db-d5cb498f3265
 # ╟─ad5a7420-1c7f-11eb-042f-115a9ef4c676
 # ╠═0b03316c-1c80-11eb-347c-1b5c9a0ae379
-# ╟─fb70cc0c-1c7f-11eb-31b5-87b168a66e19
-# ╟─3f727a2c-1c80-11eb-3608-e55ccb9786d9
+# ╠═fb70cc0c-1c7f-11eb-31b5-87b168a66e19
+# ╠═3f727a2c-1c80-11eb-3608-e55ccb9786d9
 # ╠═76ef6e46-1a06-11eb-03e3-9f40a86dc9aa
 # ╟─a45e1012-194d-11eb-3252-bb89daed3c8d
 # ╟─7ba5dda0-1ad1-11eb-1c4e-2391c11f54b3
@@ -1273,7 +1296,7 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╟─7478330a-1c81-11eb-2f9f-099f1111032c
 # ╟─ba0a869a-1ad1-11eb-091f-916e9151f052
 # ╠═3aa539ce-193f-11eb-2a0f-bbc6b83528b7
-# ╟─caa98732-19cd-11eb-04ce-2f018275cf01
+# ╠═caa98732-19cd-11eb-04ce-2f018275cf01
 # ╠═e5c0e960-19cc-11eb-107d-39b397a783ab
 # ╠═2a2b7284-1ade-11eb-3b71-d17fe2ca638a
 # ╟─e2a8d1d6-1add-11eb-0da1-cda1492a950c
@@ -1307,13 +1330,12 @@ TODO_note(text) = Markdown.MD(Markdown.Admonition("warning", "TODO note", [text]
 # ╠═b65d9a0c-1a0c-11eb-3cd5-e5a2c4302c7e
 # ╟─c00eb0a6-cab2-11ea-3887-070ebd8d56e2
 # ╟─3dd0a48c-1ca3-11eb-1127-e7c43b5d1666
-# ╠═5f3d6704-0157-4276-b8cc-9837ff0feb96
 # ╠═70de44da-b93d-456c-a86c-90b6c38cf70f
 # ╠═62c2bc86-a0af-4804-93ff-30a69177d2bd
 # ╠═f640945d-9093-4fed-b626-1b568249bc5d
 # ╠═acf8a6f1-d7bd-4775-90b2-af07349ebaec
-# ╠═0719555a-842a-47f6-b9b1-2b38633ebe20
 # ╠═9654d877-1f02-4513-85cf-6ae7b5dc3ffe
+# ╠═69d688f1-ff41-41d6-9e92-4871567669c8
 # ╠═270762e4-1ca4-11eb-2fb4-392e5c3b3e04
 # ╠═4d09c5aa-88b7-4ed3-8c85-1d8382d9e667
 # ╠═32043522-048b-4a49-a62c-500d807435ab
