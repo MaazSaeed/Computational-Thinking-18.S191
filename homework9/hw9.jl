@@ -337,13 +337,21 @@ md"""
 """
 
 # ╔═╡ 3d72ab3a-2689-11eb-360d-9b3d829b78a9
-ECS_samples = missing
+ECS_samples = let
+	ECS_distribution = Normal(3, 1.5)
+	Nsamples = 5000
+	
+	samples = rand(ECS_distribution, Nsamples)
+	#filtering out negative values, as those would imply a cooling effect, irrelevant to the context here.
+	filter(x -> x > 0, samples)
+
+end
 
 # ╔═╡ b6d7a362-1fc8-11eb-03bc-89464b55c6fc
 md"**Answer:**"
 
 # ╔═╡ 1f148d9a-1fc8-11eb-158e-9d784e390b24
-
+histogram(ECS_samples, size=(600, 300), xlabel="ECS", ylabel="samples",label=nothing)
 
 # ╔═╡ cf8dca6c-1fc8-11eb-1f89-099e6ba53c22
 md"It looks like the ECS distribution is **not normally distributed**, even though $B$ is. 
@@ -502,6 +510,7 @@ print(Model.CO2_RCP85.(t))
 
 # ╔═╡ 50ea30ba-25a1-11eb-05d8-b3d579f85652
 expected_double_CO2_year = let
+	# current year + the year when the CO2 concentration is doubled i.e. 415 -> 830
 	1850 + findfirst(ppm -> ppm >= 830 , Model.CO2_RCP85.(t))
 end
 
@@ -817,7 +826,7 @@ TODO = html"<span style='display: inline; font-size: 2em; color: purple; font-we
 # ╟─51e2e742-25a1-11eb-2511-ab3434eacc3e
 # ╟─bade1372-25a1-11eb-35f4-4b43d4e8d156
 # ╠═02232964-2603-11eb-2c4c-c7b7e5fed7d1
-# ╟─736ed1b6-1fc2-11eb-359e-a1be0a188670
+# ╠═736ed1b6-1fc2-11eb-359e-a1be0a188670
 # ╠═49cb5174-1fc3-11eb-3670-c3868c9b0255
 # ╟─f3abc83c-1fc7-11eb-1aa8-01ce67c8bdde
 # ╠═3d72ab3a-2689-11eb-360d-9b3d829b78a9
