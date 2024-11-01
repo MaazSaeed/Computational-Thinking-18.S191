@@ -95,7 +95,3 @@ To run these notebooks, you'll need Julia installed [download](https://julialang
 - `import Pluto`
 - `Pluto.run()`
 - Experiment and tinker (:
-
----
-
-I stumbled upon this course a couple of months ago and was fascinated by the content, covering topics from image analysis, particle dynamics, simulations, and ray tracing to epidemic modeling, propagation, and climate modeling using the Julia programming language. The course integrates various fields such as computer science, software development, algorithms, and mathematics.
