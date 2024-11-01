@@ -360,7 +360,12 @@ md"It looks like the ECS distribution is **not normally distributed**, even thou
 "
 
 # ╔═╡ 02173c7a-2695-11eb-251c-65efb5b4a45f
-
+let
+	ecs_b̄ = ECS()
+	ecs_b = length(filter(x -> x >= ecs_b̄, ECS_samples))/length(ECS_samples)
+	print("Probability of ECS(B) lies above ECS(B̄), $ecs_b")
+end
+	
 
 # ╔═╡ 440271b6-25e8-11eb-26ce-1b80aa176aca
 md"👉 Does accounting for uncertainty in feedbacks make our expectation of global warming better (less implied warming) or worse (more implied warming)?"
