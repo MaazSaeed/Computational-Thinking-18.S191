@@ -16,6 +16,7 @@ _In this repository, I will be uploading my coursework for 18.S191 Fall 2020. Wh
 - [Homework 8](#homework-8)
 - [Homework 9](#homework-9)
 - [Homework 10](#homework-10)
+- [Getting Started](#Getting-Started)
 ---
 
 ### Homework 0
