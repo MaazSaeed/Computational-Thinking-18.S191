@@ -90,8 +90,12 @@ Climate Modeling II
 ---
 
 ## Getting Started
-
 To run these notebooks, you'll need Julia installed [download](https://julialang.org/downloads/). Then open up the Julia REPL and type:
-- `import Pluto`
-- `Pluto.run()`
-- Experiment and tinker (:
+
+```bash
+import Pluto
+Pluto.run()
+```
+Experiment and Tinker (:
+
+
