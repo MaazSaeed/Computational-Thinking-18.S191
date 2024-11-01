@@ -192,7 +192,7 @@ The simulation begins at the preindustrial equilibrium, i.e. a temperature $T_{0
 
 # ╔═╡ fa7e6f7e-2434-11eb-1e61-1b1858bb0988
 md"""
-``B = `` $(@bind B_slider Slider(-2.5:.001:0; show_value=true, default=-1.3))
+``B = `` $(@bind B_slider Slider(-2.5:.001:2; show_value=true, default=-1.3))
 """
 
 # ╔═╡ 16348b6a-1fc2-11eb-0b9c-65df528db2a1
@@ -207,7 +207,7 @@ md"""
 
 # ╔═╡ a86f13de-259d-11eb-3f46-1f6fb40020ce
 observations_from_changing_B = md"""
-Hello world!
+A more negative value of B a smaller change in temeperature and thus less sensitive or lesser ECS i.e. there is an inverse relation. B is called the climate feedback parameter as it determines the deviation from equilibirium temperature.
 """
 
 # ╔═╡ 3d66bd30-259d-11eb-2694-471fb3a4a7be
@@ -217,7 +217,7 @@ md"""
 
 # ╔═╡ 5f82dec8-259e-11eb-2f4f-4d661f44ef41
 observations_from_nonnegative_B = md"""
-Hello world!
+when B is greater than or equal to zero the feedback parameter becomes positive resulting in a rapid increase in temperature endlessly i.e. no ceiling. Ofcourse in a real universe scenario the resulting increase in temperature will eventually boil the entirety of water bodies and result in a very hot temperature.
 """
 
 # ╔═╡ 56b68356-2601-11eb-39a9-5f4b8e580b87
@@ -235,8 +235,8 @@ md"""
 👉 Create a graph to visualize ECS as a function of B. 
 """
 
-# ╔═╡ b9f882d8-266b-11eb-2998-75d6539088c7
-
+# ╔═╡ 00140943-475f-49da-befe-e42fe6f48a51
+ECS(B;a=Model.a) = -a*log(2.)./B;
 
 # ╔═╡ 269200ec-259f-11eb-353b-0b73523ef71a
 md"""
@@ -253,13 +253,6 @@ The CO₂ concentrations in the _future_ depend on human action. There are sever
 md"""
 👉 In what year are we expected to have doubled the CO₂ concentration, under policy scenario RCP8.5?
 """
-
-# ╔═╡ 50ea30ba-25a1-11eb-05d8-b3d579f85652
-expected_double_CO2_year = let
-	
-	
-	missing
-end
 
 # ╔═╡ bade1372-25a1-11eb-35f4-4b43d4e8d156
 md"""
@@ -306,6 +299,25 @@ let
 		label="ΔT(t) = T(t) - T₀")
 end |> as_svg
 
+# ╔═╡ b9f882d8-266b-11eb-2998-75d6539088c7
+begin
+	p = plot()
+	B_values = -2.0:0.01:-0.001
+	ECS_values = ECS(B_values)
+	
+	plot!(p, B_values, ECS_values,
+    xlabel="Climate Feedback Parameter (B)",
+    ylabel="Equilibrium Climate Sensitivity (ECS)",
+    title="ECS as a Function of Climate Feedback Parameter B",
+    legend=false,
+    linewidth=2,
+    grid=true,
+	ylim=(0,10))
+
+	
+	p
+end
+
 # ╔═╡ 736ed1b6-1fc2-11eb-359e-a1be0a188670
 B_samples = let
 	B_distribution = Normal(B̅, σ)
@@ -317,7 +329,7 @@ B_samples = let
 end
 
 # ╔═╡ 49cb5174-1fc3-11eb-3670-c3868c9b0255
-histogram(B_samples, size=(600, 250), label=nothing, xlabel="B [W/m²/K]", ylabel="samples")
+histogram(B_samples, size=(600, 300), label=nothing, xlabel="B [W/m²/K]", ylabel="samples")
 
 # ╔═╡ f3abc83c-1fc7-11eb-1aa8-01ce67c8bdde
 md"""
@@ -484,6 +496,14 @@ t = 1850:2100
 # ╔═╡ e10a9b70-25a0-11eb-2aed-17ed8221c208
 plot(t, Model.CO2_RCP85.(t), 
 	ylim=(0,1200), ylabel="CO2 concentration [ppm]")
+
+# ╔═╡ 657b9da9-bf0a-424c-ba8a-98c35248e26d
+print(Model.CO2_RCP85.(t))
+
+# ╔═╡ 50ea30ba-25a1-11eb-05d8-b3d579f85652
+expected_double_CO2_year = let
+	1850 + findfirst(ppm -> ppm >= 830 , Model.CO2_RCP85.(t))
+end
 
 # ╔═╡ 40f1e7d8-252d-11eb-0549-49ca4e806e16
 @bind t_scenario_test Slider(t; show_value=true, default=1850)
@@ -778,7 +798,7 @@ TODO = html"<span style='display: inline; font-size: 2em; color: purple; font-we
 # ╠═c4398f9c-1fc4-11eb-0bbb-37f066c6027d
 # ╟─7f961bc0-1fc5-11eb-1f18-612aeff0d8df
 # ╟─25f92dec-1fc4-11eb-055d-f34deea81d0e
-# ╟─fa7e6f7e-2434-11eb-1e61-1b1858bb0988
+# ╠═fa7e6f7e-2434-11eb-1e61-1b1858bb0988
 # ╟─16348b6a-1fc2-11eb-0b9c-65df528db2a1
 # ╟─e296c6e8-259c-11eb-1385-53f757f4d585
 # ╠═a86f13de-259d-11eb-3f46-1f6fb40020ce
@@ -787,10 +807,12 @@ TODO = html"<span style='display: inline; font-size: 2em; color: purple; font-we
 # ╟─56b68356-2601-11eb-39a9-5f4b8e580b87
 # ╟─7d815988-1fc7-11eb-322a-4509e7128ce3
 # ╟─aed8f00e-266b-11eb-156d-8bb09de0dc2b
+# ╠═00140943-475f-49da-befe-e42fe6f48a51
 # ╠═b9f882d8-266b-11eb-2998-75d6539088c7
 # ╟─269200ec-259f-11eb-353b-0b73523ef71a
 # ╠═e10a9b70-25a0-11eb-2aed-17ed8221c208
 # ╟─2dfab366-25a1-11eb-15c9-b3dd9cd6b96c
+# ╠═657b9da9-bf0a-424c-ba8a-98c35248e26d
 # ╠═50ea30ba-25a1-11eb-05d8-b3d579f85652
 # ╟─51e2e742-25a1-11eb-2511-ab3434eacc3e
 # ╟─bade1372-25a1-11eb-35f4-4b43d4e8d156
