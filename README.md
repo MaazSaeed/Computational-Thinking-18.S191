@@ -14,7 +14,8 @@ _In this repository, I will be uploading my coursework for 18.S191 Fall 2020. Wh
 - [Homework 6](#homework-6)
 - [Homework 7](#homework-7)
 - [Homework 8](#homework-8)
-
+- [Homework 9](#homework-9)
+- [Homework 10](#homework-10)
 ---
 
 ### Homework 0
@@ -77,6 +78,9 @@ Epidemic Modeling III:
 - Camera
 - Surfaces
 
+### Homework 9 (todo)
+
+### Homework 10 (todo)
 ---
 
 ## Getting Started
