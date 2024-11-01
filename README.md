@@ -78,9 +78,14 @@ Epidemic Modeling III:
 - Camera
 - Surfaces
 
-### Homework 9 (todo)
-
-### Homework 10 (todo)
+### Homework 9
+Climate modeling I
+  - todo
+  - 
+### Homework 10
+Climate Modeling II
+- todo
+  
 ---
 
 ## Getting Started
