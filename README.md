@@ -55,7 +55,7 @@ Epidemic Modeling II:
 - Random walks
 - Wandering agents
 - Spatial epidemic models
-- Social distancing (or physical distancing)
+- Social distancing (actually physical distancing)
 
 ### Homework 6
 Epidemic Modeling III:
